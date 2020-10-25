@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Anime Update Tracker</title>
+    <link
+      href="style.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <div class="header">
+      <h1 class="logo">
+        Anime <span class="update">Update</span> Tracker
+        (0.1)
+      </h1>
+    </div>
+    <div class="container">
+      <p>Click "Start Tracking" on the episode you're watching</p>
+      <p>Wait 2 sec for extension to refresh</p>
+      <div class="watching">
+        <h1 id ="title">Series title</h1>
+        <p id ="episode">Episode</p>
+        <p id ="time">00:00 wait for refresh</p>
+      </div>
+      <h3>Last Watched</h3>
+      <div class="lastWatchedContainer">
+        <h1 id ="lastWatched">last watched</h1>
+        <p id ="lastWatchedEpisode">last watched Episode</p>
+        <p id ="lastWatchedTime">00:00 wait for refresh</p>
+        <button id="resume">Resume</button>
+        <button id="previous">Previous</button>
+        <button id="next">Next</button>
+      </div>
+        <button id="track">Start Tracking</button>
+    </div>
+    <p>&#169; 2020 Colin Lin</p>
+    <script src="popup.js"></script>
+  </body>
+</html>
