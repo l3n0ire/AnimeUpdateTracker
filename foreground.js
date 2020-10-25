@@ -2,7 +2,6 @@
 var title = document.getElementsByClassName("page_title")[1].innerHTML
 var episode = title.substring(title.indexOf('Episode'),title.length)
 title = title.substring(0,title.indexOf('Episode')-1)
-document.getElementsByClassName("page_title")[1].innerHTML="hello";
 console.log("Anime update tracker active")
 console.log(episode)
 var time ="00:00"

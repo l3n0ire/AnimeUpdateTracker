@@ -15,6 +15,6 @@
   "permissions": [
     "activeTab",
     "tabs",
-    "https://anime-update30.stream/view/*",
+    "https://*/*",
     "storage"]
 }
