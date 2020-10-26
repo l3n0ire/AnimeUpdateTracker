@@ -38,6 +38,25 @@ document.getElementById("next").addEventListener('click',function(){
   index = index<lastWatched.length-1 ? index+1:index
   updateDOM()
 });
+document.getElementById("delete").addEventListener('click',async function(){
+  // ask user for confirmation
+  let toDelete = confirm("Are you sure you want delete this anime from Last Watched?")
+    if(toDelete){
+    // remove the current item from storage
+    chrome.storage.sync.remove([lastWatched[index].title], function(){
+      console.log("deleted from storage")
+    });
+    // remove the current item from lastWatched
+    lastWatched.splice(index,1)
+    console.log(lastWatched)
+    // store updated lastWatched in storage
+    chrome.storage.sync.set({['lastWatched']:lastWatched}, function(){
+      console.log("deleted from lastWatched")
+    });
+    index = lastWatched.length-1
+    updateDOM()
+  }
+});
 document.getElementById("resume").addEventListener('click',async function(){
   chrome.runtime.sendMessage({action:'resume',title:lastWatched[index].title, episodeIndex:episodeIndices[index]},
     function (response) {

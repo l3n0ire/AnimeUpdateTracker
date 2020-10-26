@@ -32,8 +32,8 @@ button{
     background-color: #467caf;
     color:#fff;
     border: none;
-    height:5vh;
-    width:25vw;
+    height:10vw;
+    padding: 2vw;
     border-radius: 4px;
     margin-bottom: 0.5vh;
 }
@@ -50,4 +50,6 @@ button{
 .helpText{
     margin:1vh 0;
     display:none;
+}
+#delete{
 }

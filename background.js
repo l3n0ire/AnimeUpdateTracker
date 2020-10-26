@@ -41,9 +41,12 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
             let time = parseInt(timeText.substring(0,timeText.indexOf(":"))) * 60
             time = time + parseInt(timeText.substring(timeText.indexOf(":")+1))
             chrome.tabs.create({ url: newURL }, function (tab){
-                console.log('injected')
+                // set video to where user last left off
                 chrome.tabs.executeScript(tab.id,{code:`setTimeout(function(){ document.getElementsByTagName('video')[0].currentTime=${time};}, 1000);`
                 })
+                // start tracking
+                setTimeout(function(){injector(newURL,'./foreground.js')},1000)
+
             })
           });
         response ='resumed'
