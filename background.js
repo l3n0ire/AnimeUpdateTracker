@@ -1,4 +1,5 @@
 let pattern = /^https:\/\/anime-update.*\.stream\/view\/.*/
+var nextEpisode = false
 chrome.tabs.onActivated.addListener(tab=>{
     chrome.tabs.get(tab.tabId,tab_info=>{
         //injector(tab_info.url)
@@ -6,19 +7,14 @@ chrome.tabs.onActivated.addListener(tab=>{
     })
 })
 chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
-    if (tab.active && change.url) {
-       // injector(change.url)
+    if (tab.active && change.url && nextEpisode) {
+        injector('./foreground.js')
+        nextEpisode = false
     }
 });
 
-function injector(url, script){
-    console.log(pattern.test(url))
-
-        if(pattern.test(url)){
-            
-            chrome.tabs.executeScript(null,{file:script},()=>console.log('i injected'))
-        }
-
+function injector(script){
+    chrome.tabs.executeScript(null,{file:script},()=>console.log('i injected'))
 }
 chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
     let action = request.action
@@ -27,7 +23,7 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
         chrome.tabs.getSelected(null, (tab) => {
             if(pattern.test(tab.url)){
                 console.log("ran")
-                injector(tab.url,'./foreground.js')
+                injector('./foreground.js')
             }
         });
         response ='tracking'
@@ -45,12 +41,16 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
                 chrome.tabs.executeScript(tab.id,{code:`setTimeout(function(){ document.getElementsByTagName('video')[0].currentTime=${time};}, 1000);`
                 })
                 // start tracking
-                setTimeout(function(){injector(newURL,'./foreground.js')},1000)
+                setTimeout(function(){injector('./foreground.js')},1000)
 
             })
           });
         response ='resumed'
-
+    }
+    else if(action === 'nextEpisode'){
+        console.log('nextEpisode')
+        nextEpisode=true
+        response='nextEpisode'
     }
     sendResponse({action:response});
 })

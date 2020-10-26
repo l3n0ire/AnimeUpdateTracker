@@ -7,11 +7,22 @@ console.log(episode)
 var time ="00:00"
 var totalTime ="00:00"
 var url = window.location.href
+
 var baseURL = url.substring(0,url.indexOf('view')+5)
 var videoId = url.substring(url.indexOf('view')+5, url.length-1)
 chrome.storage.sync.set({['baseURL']:baseURL}, function() {
   console.log("stored "+ baseURL)
 });
+
+// set up listener for next episode
+let nextButton = document.getElementsByClassName('glyphicon glyphicon-arrow-right')[0]
+// check if next episode button exists
+if (nextButton != undefined){
+  nextButton=nextButton.parentElement
+  nextButton.addEventListener('click',()=>{
+    chrome.runtime.sendMessage({action:'nextEpisode'},(response)=>{});
+  })
+}
 
 function remover(arr,prop,value){
   for(let i = 0;i<arr.length;i++){
