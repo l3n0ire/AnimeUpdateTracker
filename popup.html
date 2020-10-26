@@ -6,6 +6,8 @@
       href="style.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous"/>
+
   </head>
 
   <body>
@@ -23,16 +25,25 @@
       <div class="watching">
         <h1 id ="title">Series title</h1>
         <p id ="episode">Episode</p>
-        <p id ="time">00:00 wait for refresh</p>
+        <div class="timeGroup">
+          <p id ="time">00:00</p>
+          <p class="slash">/</p>
+          <p id ="totalTime">00:00 wait for refresh</p>
+        </div>
       </div>
       <h3>Last Watched</h3>
       <div class="lastWatchedContainer">
         <h1 id ="lastWatched">last watched</h1>
         <p id ="lastWatchedEpisode">last watched Episode</p>
-        <p id ="lastWatchedTime">00:00 wait for refresh</p>
+        <div class="timeGroup">
+          <p id ="lastWatchedTime">00:00</p>
+          <p class="slash">/</p>
+          <p id ="lastWatchedTotalTime">00:00 wait for refresh</p>
+        </div>
         <button id="resume">Resume</button>
-        <button id="previous">Previous</button>
-        <button id="next">Next</button>
+        <button id="previous"><i class="fas fa-chevron-left"></i> Previous</button>
+        <button id="next">Next <i class="fas fa-chevron-right"></i></button>
+        <button id="delete"><i class="fas fa-trash"></i> Delete</button>
       </div>
         <button id="track">Start Tracking</button>
         <p  style="display:inline; float:right;"id="copyright">&#169; 2020 Colin Lin</p>
