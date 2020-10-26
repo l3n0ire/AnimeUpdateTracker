@@ -13,6 +13,7 @@ var allData
 var index
 var episodeIndices=[]
 var myPort
+var showHelp = false
 chrome.storage.sync.get(null, function(result){
   if(result!={} && result['lastWatched'] != undefined){
     allData = result
@@ -42,6 +43,15 @@ document.getElementById("resume").addEventListener('click',async function(){
     function (response) {
         console.log(response.action)
     });
+});
+document.getElementById("help").addEventListener('click',function(){
+  let helpText = document.getElementsByClassName("helpText")
+  console.log(helpText)
+  for(let e of helpText){
+    e.style.display = !showHelp? "block": "none"
+  }
+  showHelp=!showHelp
+
 });
 
 chrome.runtime.onConnect.addListener(function(port) {
