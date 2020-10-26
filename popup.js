@@ -25,10 +25,17 @@ chrome.storage.sync.get(null, function(result){
     updateDOM()
   }
 });
-function updateDOM(){
-  document.getElementById('lastWatched').innerHTML=lastWatched[index].title
-  document.getElementById('lastWatchedEpisode').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].episode
-  document.getElementById('lastWatchedTime').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].time
+function updateDOM(isDelete=false){
+  console.log(index)
+  if(isDelete && index<0){
+    location.reload()
+  }
+  else{
+    document.getElementById('lastWatched').innerHTML=lastWatched[index].title
+    document.getElementById('lastWatchedEpisode').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].episode
+    document.getElementById('lastWatchedTime').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].time
+    document.getElementById('lastWatchedTotalTime').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].totalTime
+  }
 }
 document.getElementById("previous").addEventListener('click',function(){
   index = index>0 ? index-1:index
@@ -54,7 +61,7 @@ document.getElementById("delete").addEventListener('click',async function(){
       console.log("deleted from lastWatched")
     });
     index = lastWatched.length-1
-    updateDOM()
+    updateDOM(true)
   }
 });
 document.getElementById("resume").addEventListener('click',async function(){
@@ -80,6 +87,7 @@ chrome.runtime.onConnect.addListener(function(port) {
       document.getElementById("title").innerHTML=msg.title;
       document.getElementById("episode").innerHTML=msg.episode;
       document.getElementById("time").innerHTML=msg.time;
+      document.getElementById("totalTime").innerHTML=msg.totalTime;
       document.getElementById("track").innerHTML = msg.action
       port.postMessage({status: "ok"});
     });

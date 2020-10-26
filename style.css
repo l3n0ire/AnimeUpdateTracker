@@ -51,5 +51,6 @@ button{
     margin:1vh 0;
     display:none;
 }
-#delete{
+#time, #totalTime, #lastWatchedTime, #lastWatchedTotalTime, .slash{
+    display: inline-block;
 }
