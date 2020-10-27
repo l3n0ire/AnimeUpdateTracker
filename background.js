@@ -1,4 +1,4 @@
-let animeUpdate = /^https:\/\/anime-update.*\.stream\/view\/.*/
+let animeUpdate = /^https:\/\/anime-update.*/
 let fourAnime = /^https:\/\/4anime\.to.*\//
 var sites ={'animeUpdate':animeUpdate,'fourAnime':fourAnime}
 var nextEpisode = false
@@ -46,12 +46,21 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
             let timeText = result[request.title][request.episodeIndex].time
             let time = parseInt(timeText.substring(0,timeText.indexOf(":"))) * 60
             time = time + parseInt(timeText.substring(timeText.indexOf(":")+1))
+            let videoElement
+            let delay = 1000
+            if(url.indexOf('anime-update')>=0){
+                videoElement='video'
+                delay = 2000
+            }
+            else if (url.indexOf('4anime')>=0){
+                videoElement = '#example_video_1_html5_api'
+            }
+            //
             chrome.tabs.create({ "url": url }, function (tab){
                 // set video to where user last left off
-                chrome.tabs.executeScript(tab.id,{code:`setTimeout(function(){ document.querySelector('#example_video_1_html5_api').currentTime=${time};}, 1000);`
-                })
+                setTimeout(function(){chrome.tabs.executeScript(null,{code:`document.querySelector('${videoElement}').currentTime=${time}`})}, delay)
                 // start tracking
-                setTimeout(function(){injector('./foreground.js')},1000)
+                setTimeout(function(){injector('./foreground.js')}, delay)
 
             })
           });
