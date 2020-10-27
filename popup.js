@@ -32,9 +32,11 @@ function updateDOM(isDelete=false){
   }
   else{
     document.getElementById('lastWatched').innerHTML=lastWatched[index].title
-    document.getElementById('lastWatchedEpisode').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].episode
-    document.getElementById('lastWatchedTime').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].time
-    document.getElementById('lastWatchedTotalTime').innerHTML=allData[lastWatched[index].title][episodeIndices[index]].totalTime
+    let episodeObj = allData[lastWatched[index].title][episodeIndices[index]]
+    document.getElementById('lastWatchedEpisode').innerHTML=episodeObj.episode
+    document.getElementById('lastWatchedTime').innerHTML=episodeObj.time
+    document.getElementById('lastWatchedTotalTime').innerHTML=episodeObj.totalTime
+    document.getElementById('lastWatchedSite').innerHTML=episodeObj.site
   }
 }
 document.getElementById("previous").addEventListener('click',function(){
@@ -89,6 +91,7 @@ chrome.runtime.onConnect.addListener(function(port) {
       document.getElementById("time").innerHTML=msg.time;
       document.getElementById("totalTime").innerHTML=msg.totalTime;
       document.getElementById("track").innerHTML = msg.action
+      document.getElementById("site").innerHTML =msg.site
       port.postMessage({status: "ok"});
     });
   });
