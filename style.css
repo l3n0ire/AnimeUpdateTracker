@@ -45,6 +45,7 @@ button{
 }
 #copyright{
     text-align: right;
+    margin-top: 3vh;
 }
 .helpText{
     margin:1vh 0;
