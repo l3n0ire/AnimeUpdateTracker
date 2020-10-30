@@ -11,17 +11,14 @@ document.getElementById("track").addEventListener('click',async function(){
 var lastWatched
 var allData
 var index
-var episodeIndices=[]
 var myPort
 var showHelp = false
+console.log("hello")
 chrome.storage.sync.get(null, function(result){
   if(result!={} && result['lastWatched'] != undefined){
     allData = result
     lastWatched=allData['lastWatched']
     index = lastWatched.length-1
-    for(let i=0;i<lastWatched.length;i++){
-      episodeIndices.push(allData[lastWatched[i].title].length-1) 
-    }
     updateDOM()
   }
 });
@@ -31,8 +28,8 @@ function updateDOM(isDelete=false){
     location.reload()
   }
   else{
-    document.getElementById('lastWatched').innerHTML=lastWatched[index].title
-    let episodeObj = allData[lastWatched[index].title][episodeIndices[index]]
+    document.getElementById('lastWatched').innerHTML=lastWatched[index]
+    let episodeObj = allData[lastWatched[index]]
     document.getElementById('lastWatchedEpisode').innerHTML=episodeObj.episode
     document.getElementById('lastWatchedTime').innerHTML=episodeObj.time
     document.getElementById('lastWatchedTotalTime').innerHTML=episodeObj.totalTime
@@ -52,7 +49,7 @@ document.getElementById("delete").addEventListener('click',async function(){
   let toDelete = confirm("Are you sure you want delete this anime from Last Watched?")
     if(toDelete){
     // remove the current item from storage
-    chrome.storage.sync.remove([lastWatched[index].title], function(){
+    chrome.storage.sync.remove([lastWatched[index]], function(){
       console.log("deleted from storage")
     });
     // remove the current item from lastWatched
@@ -67,7 +64,7 @@ document.getElementById("delete").addEventListener('click',async function(){
   }
 });
 document.getElementById("resume").addEventListener('click',async function(){
-  chrome.runtime.sendMessage({action:'resume',title:lastWatched[index].title, episodeIndex:episodeIndices[index]},
+  chrome.runtime.sendMessage({action:'resume',title:lastWatched[index]},
     function (response) {
         console.log(response.action)
     });
@@ -90,8 +87,8 @@ chrome.runtime.onConnect.addListener(function(port) {
       document.getElementById("episode").innerHTML=msg.episode;
       document.getElementById("time").innerHTML=msg.time;
       document.getElementById("totalTime").innerHTML=msg.totalTime;
-      document.getElementById("track").innerHTML = msg.action
       document.getElementById("site").innerHTML =msg.site
+      document.getElementById("track").innerHTML = msg.action
       port.postMessage({status: "ok"});
     });
   });

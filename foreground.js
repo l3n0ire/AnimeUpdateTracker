@@ -55,10 +55,9 @@ if (toTrackButtons != undefined){
   }
 }
 
-function remover(arr,prop,value){
+function remover(arr,value){
   for(let i = 0;i<arr.length;i++){
-    let curr= arr[i]
-    if(curr[prop] === value){
+    if(arr[i]=== value){
       arr.splice(i,1)
       console.log("removed")
     }
@@ -67,6 +66,7 @@ function remover(arr,prop,value){
 }
 
 setInterval(function() {
+  // get time from video players
   if(site == 'Anime Update'){
     time = document.getElementsByClassName('plyr__controls__item plyr__time--current plyr__time')[0].innerHTML
     totalTime = document.getElementsByClassName('plyr__controls__item plyr__time--duration plyr__time')[0].innerHTML
@@ -77,43 +77,29 @@ setInterval(function() {
     totalTime = document.querySelector('.vjs-duration-display').innerHTML
     totalTime = totalTime.substring(totalTime.lastIndexOf(' ')+1)
   }
-    console.log(time)
-    let toStore=[]
+    let toStore
     var toStoreLW=[]
-    chrome.storage.sync.get(title, function(series){
-      if(series[title] ==  undefined){
-        console.log("new")
-        toStore.push({"episode":episode,"time":time,"totalTime":totalTime, "url":url, "site":site})
+
+    // store current episode in storage
+    toStore = {"episode":episode,"time":time,"totalTime":totalTime, "url":url, "site":site}
+    chrome.storage.sync.set({[title]:toStore}, function() {
+      console.log('added ' + title+" "+episode+" "+time+"/"+totalTime)
+    });
+
+    // update last watched
+    chrome.storage.sync.get(['lastWatched'], function(result){
+      if(result['lastWatched'] == undefined){
+        toStoreLW.push(title)
       }
       else{
-        // remove existing episode entry
-        remover(series[title],'episode',episode)
-        // insert new episode
-        series[title].push({"episode":episode,"time":time,"totalTime":totalTime, "url":url, "site":site})
-        toStore=series[title]
-        console.log(series[title])
-        console.log("old")
+        // remove existing series entry
+        remover(result['lastWatched'],title)
+        // insert new series to end of array
+        result['lastWatched'].push(title)
+        toStoreLW = result['lastWatched']
       }
-      chrome.storage.sync.set({[title]:toStore}, function() {
-        console.log('added ' + title+" "+episode+" "+time+"/"+totalTime)
-      });
-      chrome.storage.sync.get(['lastWatched'], function(result){
-        console.log(result['lastWatched'] ==  undefined)
-        console.log(result['lastWatched'])
-        if(result['lastWatched'] == undefined){
-          toStoreLW.push({title:title})
-        }
-        else{
-          // remove existing series entry
-          remover(result['lastWatched'],'title',title)
-          // insert new series
-          result['lastWatched'].push({title:title})
-          toStoreLW = result['lastWatched']
-          console.log(result['lastWatched'])
-        }
-        chrome.storage.sync.set({['lastWatched']:toStoreLW}, function() {
-          console.log('last watched ' +title+" "+episode+" "+time+"/"+totalTime)
-        });
+      chrome.storage.sync.set({['lastWatched']:toStoreLW}, function() {
+        console.log('last watched ' +title+" "+episode+" "+time+"/"+totalTime)
       });
     });
     

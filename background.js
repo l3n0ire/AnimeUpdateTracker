@@ -42,8 +42,8 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
     }
     else if (action === 'resume'){
         chrome.storage.sync.get(null, function(result){
-            let url = result[request.title][request.episodeIndex].url
-            let timeText = result[request.title][request.episodeIndex].time
+            let url = result[request.title].url
+            let timeText = result[request.title].time
             let time = parseInt(timeText.substring(0,timeText.indexOf(":"))) * 60
             time = time + parseInt(timeText.substring(timeText.indexOf(":")+1))
             let videoElement
