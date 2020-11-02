@@ -90,7 +90,7 @@ document.getElementById("help").addEventListener('click',function(){
   showHelp=!showHelp
 });
 
-// update "Currently Watchin" DOM when message is received from foreground.js 
+// update "Currently Watching" DOM when message is received from foreground.js 
 chrome.runtime.onConnect.addListener(function(port) {
     myPort = port
     console.assert(port.name == "info");
