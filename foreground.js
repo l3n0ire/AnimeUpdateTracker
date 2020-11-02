@@ -64,12 +64,36 @@ function remover(arr,value){
   }
   return arr
 }
+function setTime(videoPlayer){
+  let timeElement
+  let totalTimeElement
 
+  if(videoPlayer == "Video"){
+    timeElement=".plyr__controls__item.plyr__time--current.plyr__time"
+    totalTimeElement=".plyr__controls__item.plyr__time--duration.plyr__time"
+  }
+  // other ones wont work because video players are iframes
+  // Can't get DOM elements of cross-domain iframe
+  else if( videoPlayer == "MX"){
+    timeElement = ".vjs-current-time-display"
+    totalTimeElement = ".vjs-duration-display"
+  }
+  else if( videoPlayer == "VCDN" || videoPlayer == "Viz" ){
+    timeElement = ".jw-icon.jw-icon-inline.jw-text.jw-reset.jw-text-elapsed"
+    totalTimeElement = ".jw-icon.jw-icon-inline.jw-text.jw-reset.jw-text-duration"
+    
+  }
+  time = document.querySelector(timeElement).innerHTML
+  totalTime = document.querySelector(totalTimeElement).innerHTML
+
+}
 setInterval(function() {
   // get time from video players
   if(site == 'Anime Update'){
-    time = document.getElementsByClassName('plyr__controls__item plyr__time--current plyr__time')[0].innerHTML
-    totalTime = document.getElementsByClassName('plyr__controls__item plyr__time--duration plyr__time')[0].innerHTML
+    let videoPlayer = document.querySelector(".nav.nav-tabs.hometab .active a").innerHTML
+    console.log("time "+videoPlayer)
+    // sets time and totalTime from video player data 
+    setTime(videoPlayer)
   }
   else if(site == '4anime'){
     time = document.querySelector('.vjs-current-time-display').innerHTML
@@ -110,11 +134,8 @@ setInterval(function() {
     
     
     
-}, 2*1000);
-/*
-set current time of video (in seconds)
-document.getElementsByTagName("video")[0].currentTime=172
-*/
+}, 5*1000);
+
 
 
 

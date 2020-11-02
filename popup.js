@@ -1,6 +1,4 @@
 document.getElementById("track").addEventListener('click',async function(){
-    
-    
     await chrome.runtime.sendMessage({action: "track"},
     function (response) {
         let action = response.action;

@@ -55,7 +55,7 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
             else if (url.indexOf('4anime')>=0){
                 videoElement = '#example_video_1_html5_api'
             }
-            //
+            
             chrome.tabs.create({ "url": url }, function (tab){
                 // set video to where user last left off
                 setTimeout(function(){chrome.tabs.executeScript(null,{code:`document.querySelector('${videoElement}').currentTime=${time}`})}, delay)
