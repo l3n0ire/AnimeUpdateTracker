@@ -1,16 +1,29 @@
 var url = window.location.href
 var site
+
 // initialize vars according to the site
 if(url.indexOf('anime-update')>=0){
   site="Anime Update"
   let fullName = document.getElementsByClassName("page_title")[1].innerHTML
-  var episode = fullName.substring(fullName.indexOf('Episode'),fullName.length)
-  var title = fullName.substring(0,fullName.indexOf('Episode')-1)
+  // Values for OVAs and Movies
+  var episode = ""
+  var title = fullName
+  // Values for an episode of a series
+  if(fullName.indexOf('Episode')>=0){
+    episode = fullName.substring(fullName.indexOf('Episode'),fullName.length)
+    title = fullName.substring(0,fullName.indexOf('Episode')-1)
+  }
+
   console.log("Anime update tracker active")
+
   let baseURL = 'https://anime-update.com/watch-online/'
+
   // for some reason hunter x hunter doesn't follow this pattern
   if (fullName.indexOf('Hunter x Hunter')>=0) 
-    fullName=fullName.replace('Episode ','')
+    fullName=fullName.replace('Episode ','');
+  
+
+  /* Generate url from fullName */
 
   fullName = fullName.toLowerCase()
   // remove all special characters
@@ -19,33 +32,35 @@ if(url.indexOf('anime-update')>=0){
   fullName = fullName.replace(/ /g,'-')
   // remove trailing '-'
   url =baseURL+fullName.substring(0,fullName.length-1)
+
   // next and previous buttons
   let nextButton = document.querySelector('.glyphicon.glyphicon-arrow-right')
   let previousButton = document.querySelector('.glyphicon.glyphicon-arrow-left')
   nextButton = nextButton != undefined? nextButton.parentElement:nextButton
   previousButton = previousButton != undefined? previousButton.parentElement:previousButton
   var toTrackButtons = [nextButton,previousButton]
-
-
 }
 else if(url.indexOf('4anime')>=0){
   site="4anime"
   var title = document.querySelector(".singletitletop a").innerHTML
   var episode = document.querySelectorAll('#titleleft')[1].innerHTML
+
   console.log("4anime tracker active")
+
   // two next and previous buttons for mobile/desktop
   let nextButtons = document.querySelectorAll('.anipager-next a')
   let previousButtons = document.querySelectorAll('.anipager-prev a')
   let episodeButtons = document.querySelectorAll('.episodes li a')
   var toTrackButtons = [...nextButtons,...previousButtons,...episodeButtons]
 }
+
 // common vars
 var time ="00:00"
 var totalTime ="00:00"
 
-
 // check if next episode buttons exists
 if (toTrackButtons != undefined){
+  // add an event listener to each button which triggers the nextEpisode event
   for(button of toTrackButtons){
     if(button != undefined){
       button.addEventListener('click',()=>{
@@ -55,6 +70,11 @@ if (toTrackButtons != undefined){
   }
 }
 
+/**
+ * Removes value from arr
+ * @param {array} arr The array to remove from
+ * @param {string} value The value of the element to be removed
+ */
 function remover(arr,value){
   for(let i = 0;i<arr.length;i++){
     if(arr[i]=== value){
@@ -65,11 +85,42 @@ function remover(arr,value){
   return arr
 }
 
+/**
+ * Extracts time and totalTime values from a video player with name of videoPlayer
+ * 
+ * @param {string} videoPlayer The name of the video player 
+ */
+function setTime(videoPlayer){
+  let timeElement
+  let totalTimeElement
+
+  if(videoPlayer == "Video"){
+    timeElement=".plyr__controls__item.plyr__time--current.plyr__time"
+    totalTimeElement=".plyr__controls__item.plyr__time--duration.plyr__time"
+  }
+  // Other video players wont work because they are iframes
+  // Can't get DOM elements of cross-domain iframe
+  else if( videoPlayer == "MX"){
+    timeElement = ".vjs-current-time-display"
+    totalTimeElement = ".vjs-duration-display"
+  }
+  else if( videoPlayer == "VCDN" || videoPlayer == "Viz" ){
+    timeElement = ".jw-icon.jw-icon-inline.jw-text.jw-reset.jw-text-elapsed"
+    totalTimeElement = ".jw-icon.jw-icon-inline.jw-text.jw-reset.jw-text-duration"
+    
+  }
+  time = document.querySelector(timeElement).innerHTML
+  totalTime = document.querySelector(totalTimeElement).innerHTML
+
+}
+
 setInterval(function() {
   // get time from video players
   if(site == 'Anime Update'){
-    time = document.getElementsByClassName('plyr__controls__item plyr__time--current plyr__time')[0].innerHTML
-    totalTime = document.getElementsByClassName('plyr__controls__item plyr__time--duration plyr__time')[0].innerHTML
+    let videoPlayer = document.querySelector(".nav.nav-tabs.hometab .active a").innerHTML
+    console.log("time "+videoPlayer)
+    // sets time and totalTime from video player data 
+    setTime(videoPlayer)
   }
   else if(site == '4anime'){
     time = document.querySelector('.vjs-current-time-display').innerHTML
@@ -102,19 +153,16 @@ setInterval(function() {
         console.log('last watched ' +title+" "+episode+" "+time+"/"+totalTime)
       });
     });
-    
+
+    // connect to port info
     let port = chrome.runtime.connect({name: "info"});
+
+    // pass data for popup.js to display
     port.postMessage({title:title, episode:episode, time:time, totalTime:totalTime, site:site, action:'tracking'});
-    port.onMessage.addListener(function(msg) {
-    });
+    port.onMessage.addListener(function(msg) {});
     
-    
-    
-}, 2*1000);
-/*
-set current time of video (in seconds)
-document.getElementsByTagName("video")[0].currentTime=172
-*/
+}, 5*1000);
+
 
 
 
