@@ -93,3 +93,42 @@ chrome.runtime.onMessage.addListener( async(request,sender,sendResponse)=>{
     }
     sendResponse({action:response});
 })
+
+// mal_ids of anime series
+var malIDs = {}
+var daysOfWeek = ['monday', 'tuesday','wednesday', 'thursday','friday','saturday','sunday']
+
+updateMalIDs = () => {
+    chrome.storage.sync.get(['malIDs'], function(result){
+    // if malIDs doesn't exist or its monday (1), create/update it  
+    let d = new Date()
+    if (result['malIDs'] == undefined || d.getDay() == 1){
+        fetch("https://api.jikan.moe/v3/schedule",{
+            method: 'GET', // *GET, POST, PUT, DELETE, etc.
+            mode: 'cors', // no-cors, *cors, same-origin
+            headers: {
+              'Content-Type': 'application/json'
+            }})
+        .then(res=> res.json()) // convert json to JS object
+        .then(data =>{
+            for(key in data){
+                if(daysOfWeek.includes(key))
+                    for(obj of data[key]){
+                        // key is anime title, value is mal_id
+                        malIDs[obj['title']] = obj['mal_id']
+                    }
+            }
+            chrome.storage.sync.set({['malIDs']:malIDs}, function() {
+                console.log('updated mal_ids')
+            });
+        })
+    }
+    else{
+        console.log(result['malIDs'])
+    }
+
+    });
+}
+updateMalIDs() 
+// run this every 24 hours
+setInterval(updateMalIDs, 24 * 60 * 60 * 1000);
