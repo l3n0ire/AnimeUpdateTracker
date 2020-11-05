@@ -49,7 +49,7 @@ var broadcastTimes = {}
  * Only invoked when anime is not found in broadcastTimes
  */
 function updateBroadcastTimes(){
-  // check if anime is currently airing
+  // currently airing anime
   if(lastWatched[index] in allData['malIDs']){
     fetch(`https://api.jikan.moe/v3/anime/${allData['malIDs'][lastWatched[index]]}`)
     .then(res => res.json())
@@ -72,6 +72,11 @@ function updateBroadcastTimes(){
       broadcastTimes[lastWatched[index]] = formattedDate
       scheduleElement.innerHTML = formattedDate
     })
+  }
+  // completed series
+  else{
+    broadcastTimes[lastWatched[index]] = null
+    scheduleElement.innerHTML = null
   }
 
 }
