@@ -16,13 +16,70 @@ var showHelp = false
 
 // get lastWatched and episode data from storage
 chrome.storage.sync.get(null, function(result){
-  if(result!={} && result['lastWatched'] != undefined){
+  if(result!={}){
     allData = result
-    lastWatched=allData['lastWatched']
-    index = lastWatched.length-1
-    updateDOM()
+    if(result['lastWatched'] != undefined){
+      lastWatched=allData['lastWatched']
+      index = lastWatched.length-1
+      updateDOM()
+    }
+    if(result['malIDs'] != undefined){
+      console.log("called")
+      updateBroadcastTimes()
+    }
   }
+
 });
+// Generate dates
+var days={}
+days['Mondays']= new Date(2020,10,09,0,0,0,0)
+days['Tuesdays']= new Date(2020,10,10,0,0,0,0)
+days['Wednesdays']= new Date(2020,10,11,0,0,0,0)
+days['Thursdays']= new Date(2020,10,12,0,0,0,0)
+days['Fridays']= new Date(2020,10,13,0,0,0,0)
+days['Saturdays']= new Date(2020,10,14,0,0,0,0)
+days['Sundays']= new Date(2020,10,15,0,0,0,0)
+
+var scheduleElement = document.getElementById("schedule")
+// broadcast times for each anime
+var broadcastTimes = {}
+
+/**
+ * Updates or creates the broadcastTimes object by fetching from API
+ * Only invoked when anime is not found in broadcastTimes
+ */
+function updateBroadcastTimes(){
+  // currently airing anime
+  if(lastWatched[index] in allData['malIDs']){
+    fetch(`https://api.jikan.moe/v3/anime/${allData['malIDs'][lastWatched[index]]}`)
+    .then(res => res.json())
+    .then(data =>{
+      // store it in broadcastTimes and update DOM
+      let timeStr = data['broadcast']
+      let hour = timeStr.substring(timeStr.indexOf(':')-2,timeStr.indexOf(':'))
+      let min = timeStr.substring(timeStr.indexOf(':')+1,timeStr.indexOf(':')+3)
+      let day = timeStr.substring(0,timeStr.indexOf(' at '))
+      hour = parseInt(hour)
+      min = parseInt(min)
+      let tempDate = new Date()
+      let offset = tempDate.getTimezoneOffset();
+      // japan is utc +9
+      offset = (-9*60) - offset
+      // offset is in min, convert to ms
+      let dummyDate = new Date(days[day].getTime()+(offset+(hour*60)+min)*(60*1000))
+      let dayOfWeek = ['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
+      let formattedDate = dayOfWeek[dummyDate.getDay()] +" at "+ dummyDate.toLocaleTimeString([], {timeStyle: 'short'})
+      broadcastTimes[lastWatched[index]] = formattedDate
+      scheduleElement.innerHTML = formattedDate
+    })
+  }
+  // completed series
+  else{
+    broadcastTimes[lastWatched[index]] = null
+    scheduleElement.innerHTML = null
+  }
+
+}
 
 /**
  * Update "Last Watched" DOM with latest data
@@ -34,6 +91,13 @@ function updateDOM(isDelete=false){
     location.reload()
   }
   else{
+    // if anime is not in broadcastTimes get it from api
+    if (!(lastWatched[index] in broadcastTimes)){
+      updateBroadcastTimes()
+    }
+    else{
+      scheduleElement.innerHTML = broadcastTimes[lastWatched[index]]
+    }
     document.getElementById('lastWatched').innerHTML=lastWatched[index]
     let episodeObj = allData[lastWatched[index]]
     document.getElementById('lastWatchedEpisode').innerHTML=episodeObj.episode
@@ -104,3 +168,4 @@ chrome.runtime.onConnect.addListener(function(port) {
       port.postMessage({status: "ok"});
     });
 });
+
