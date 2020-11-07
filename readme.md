@@ -29,8 +29,7 @@ For developers
 - "Delete" will remove that episode from "Last Watched" and it will no longer appear when cycling through the anime you have tracked
 
 ## Issues
-- OVAs and movies will not be tracked properly. A fix for this will come in a future update
-- Only the "video" video player on Anime Update is supported. Support for other video players will come in a future update
+- Only the "video" video player on Anime Update is supported. Support for other video players is not possible at this time
 - Resume may not work for some episodes on Anime Update. Please report these by opening an issue and providing a link to the episode
 
 
