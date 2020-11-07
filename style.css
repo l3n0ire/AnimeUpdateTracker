@@ -8,7 +8,7 @@ body{
     padding:3vw;
     height:100%
 }
-h1{
+h1,h2{
     margin: 0;
 }
 .header{
@@ -24,7 +24,7 @@ h1{
 .watching, .lastWatchedContainer{
     border: 1px solid #d3d3d3;
     background-color:#fff;
-    margin-bottom: 3vh;
+    margin-bottom: 2vh;
     padding: 2vw;
     box-shadow: 1px 1px 7px#d8d8d8;
 }
@@ -35,7 +35,7 @@ button{
     height:10vw;
     padding: 2vw;
     border-radius: 4px;
-    margin: 0.5vh 0;
+    margin: 1vw 0;
 }
 #track{
     width:35vw;
@@ -57,3 +57,29 @@ button{
 p {
     margin: 1vh 0;
 }
+#imageContainer{
+    float:left;
+    margin-right:3vw;
+    height: 26vh;
+    margin-bottom: 1vh;
+}
+#artwork{
+    width:30vw;
+    height: 26vh;
+}
+#lastWatchedSide h3{
+    margin-top:0;
+    margin-bottom:5px;
+}
+#lastWatchedSide{
+    height: 26vh;
+    margin-bottom: 1vh;
+}
+#title{
+    margin:1vh 0;
+}
+.sectionLabel{
+    margin:2vh 0;
+}
+
+

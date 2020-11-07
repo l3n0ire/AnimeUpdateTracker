@@ -12,16 +12,16 @@
     <div class="header">
       <h1 class="logo">
         Anime <span class="update">Update</span> Tracker
-        (0.4)
+        (0.5)
       </h1>
     </div>
     <div class="container">
       <button id="help">Help</button>
       <p class="helpText">Click "Start Tracking" on the episode you're watching</p>
       <p class="helpText">Click "Previous" and "Next" to cycle through the anime you're tracking</p>
-      <h3>Currently watching</h3>
+      <h3 class="sectionLabel">Currently watching</h3>
       <div class="watching">
-        <h1 id ="title">Series title</h1>
+        <h3 id ="title">Series title</h3>
         <p id ="episode">Episode</p>
         <p id="site">Site</p>
         <div class="timeGroup">
@@ -30,16 +30,21 @@
           <p id ="totalTime">00:00 wait 5 sec for refresh</p>
         </div>
       </div>
-      <h3>Last Watched</h3>
+      <h3 class="sectionLabel">Last Watched</h3>
       <div class="lastWatchedContainer">
-        <h1 id ="lastWatched">last watched</h1>
-        <p id ="lastWatchedEpisode">last watched Episode</p>
-        <p id="lastWatchedSite"> last watched Site</p>
-        <p id="schedule"> Days on 00:00 </p>
-        <div class="timeGroup">
-          <p id ="lastWatchedTime">00:00</p>
-          <p class="slash">/</p>
-          <p id ="lastWatchedTotalTime">00:00 wait for refresh</p>
+        <div id="imageContainer">
+          <img src="" id="artwork"/>
+        </div>
+        <div id="lastWatchedSide">
+          <h3 id ="lastWatched">last watched</h3>
+          <p id ="lastWatchedEpisode">last watched Episode</p>
+          <p id="lastWatchedSite"> last watched Site</p>
+          <p id="schedule"> Days on 00:00 </p>
+          <div class="timeGroup">
+            <p id ="lastWatchedTime">00:00</p>
+            <p class="slash">/</p>
+            <p id ="lastWatchedTotalTime">00:00 wait for refresh</p>
+          </div>
         </div>
         <button id="resume">Resume</button>
         <button id="previous"><i class="fas fa-chevron-left"></i> Previous</button>
