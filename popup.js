@@ -44,18 +44,18 @@ var broadcastTimes = {}
 // artwork for each anime
 var artwork = {}
 // malids for each anime
-var malIDs={}
+var malIDs = {}
 
 /**
  * Updates or creates the broadcastTimes object by fetching from API
  * Only invoked when anime is not found in broadcastTimes
  */
 function updateBroadcastTimes() {
-  
- 
+
+
   let queryName = lastWatched[index]
-  // replace spacs with %20
-  queryName.replace(" ","%20")
+  // replace spaces with %20
+  queryName.replace(" ", "%20")
 
   // Get malId and artwork for anime by searching by name
   // limit results to 1
@@ -73,38 +73,35 @@ function updateBroadcastTimes() {
 
       // get broadcast date
       fetch(`https://api.jikan.moe/v3/anime/${malIDs[lastWatched[index]]}`)
-      .then(res => res.json())
-      .then(data =>{
-        // check if its airing
-        if(data.airing){
-          // store it in broadcastTimes and update DOM
-          let timeStr = data['broadcast']
-          let hour = timeStr.substring(timeStr.indexOf(':') - 2, timeStr.indexOf(':'))
-          let min = timeStr.substring(timeStr.indexOf(':') + 1, timeStr.indexOf(':') + 3)
-          let day = timeStr.substring(0, timeStr.indexOf(' at '))
-          hour = parseInt(hour)
-          min = parseInt(min)
-          let tempDate = new Date()
-          let offset = tempDate.getTimezoneOffset();
-          // japan is utc +9
-          offset = (-9 * 60) - offset
-          // offset is in min, convert to ms
-          let dummyDate = new Date(days[day].getTime() + (offset + (hour * 60) + min) * (60 * 1000))
-          let dayOfWeek = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
-          let formattedDate = dayOfWeek[dummyDate.getDay()] + " at " + dummyDate.toLocaleTimeString([], { timeStyle: 'short' })
-          broadcastTimes[lastWatched[index]] = formattedDate
-          scheduleElement.innerHTML = formattedDate
-        }
-        // completed series
-        else {
-          broadcastTimes[lastWatched[index]] = null
-          scheduleElement.innerHTML = null
-        }
-      });
-
+        .then(res => res.json())
+        .then(data => {
+          // check if its airing
+          if (data.airing) {
+            // store it in broadcastTimes and update DOM
+            let timeStr = data['broadcast']
+            let hour = timeStr.substring(timeStr.indexOf(':') - 2, timeStr.indexOf(':'))
+            let min = timeStr.substring(timeStr.indexOf(':') + 1, timeStr.indexOf(':') + 3)
+            let day = timeStr.substring(0, timeStr.indexOf(' at '))
+            hour = parseInt(hour)
+            min = parseInt(min)
+            let tempDate = new Date()
+            let offset = tempDate.getTimezoneOffset();
+            // japan is utc +9
+            offset = (-9 * 60) - offset
+            // offset is in min, convert to ms
+            let dummyDate = new Date(days[day].getTime() + (offset + (hour * 60) + min) * (60 * 1000))
+            let dayOfWeek = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
+            let formattedDate = dayOfWeek[dummyDate.getDay()] + " at " + dummyDate.toLocaleTimeString([], { timeStyle: 'short' })
+            broadcastTimes[lastWatched[index]] = formattedDate
+            scheduleElement.innerHTML = formattedDate
+          }
+          // completed series
+          else {
+            broadcastTimes[lastWatched[index]] = null
+            scheduleElement.innerHTML = null
+          }
+        });
     });
-
-  
 }
 
 /**
@@ -123,7 +120,7 @@ function updateDOM(isDelete = false) {
     }
     else {
       // for currently airing update broadcast time
-      if(lastWatched[index] in broadcastTimes)
+      if (lastWatched[index] in broadcastTimes)
         scheduleElement.innerHTML = broadcastTimes[lastWatched[index]]
       // update artwork
       artworkElement.src = artwork[lastWatched[index]]
@@ -198,41 +195,3 @@ chrome.runtime.onConnect.addListener(function (port) {
     port.postMessage({ status: "ok" });
   });
 });
-
-//https://api.jikan.moe/v3/search/anime?q=Grand%20Blue&limit1
-
-/*
-// mal_ids of anime series
-var malIDs = {}
-var daysOfWeek = ['monday', 'tuesday','wednesday', 'thursday','friday','saturday','sunday']
-
-updateMalIDs = () => {
-    chrome.storage.sync.get(['malIDs'], function(result){
-    // if malIDs doesn't exist, create it
-    let d = new Date()
-    // construct query
-
-    // get malID of series
-    fetch("https://api.jikan.moe/v3/schedule")
-    .then(res=> res.json()) // convert json to JS object
-    .then(data =>{
-        for(key in data){
-            if(daysOfWeek.includes(key))
-                for(obj of data[key]){
-                    // key is anime title, value is mal_id
-                    malIDs[obj['title']] = obj['mal_id']
-                }
-        }
-        chrome.storage.sync.set({['malIDs']:malIDs}, function() {
-            console.log('updated mal_ids')
-        });
-    })
-    if (result['malIDs'] == undefined || d.getDay() == 1){
-    }
-    else{
-        console.log(result['malIDs'])
-    }
-
-    });
-}
-*/
