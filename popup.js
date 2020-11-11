@@ -13,6 +13,8 @@ var allData
 var index
 var myPort
 var showHelp = false
+var isBrowsing = false
+var currWatching = ''
 
 // get lastWatched and episode data from storage
 chrome.storage.sync.get(null, function (result) {
@@ -104,6 +106,7 @@ function updateBroadcastTimes() {
     });
 }
 
+
 /**
  * Update "Last Watched" DOM with latest data
  * 
@@ -125,6 +128,7 @@ function updateDOM(isDelete = false) {
       // update artwork
       artworkElement.src = artwork[lastWatched[index]]
     }
+    document.querySelector('.sectionLabel').innerHTML = lastWatched[index] == currWatching ? "Currently Watching" : "Last Watched"
     document.getElementById('lastWatched').innerHTML = lastWatched[index]
     let episodeObj = allData[lastWatched[index]]
     document.getElementById('lastWatchedEpisode').innerHTML = episodeObj.episode
@@ -137,10 +141,12 @@ function updateDOM(isDelete = false) {
 // update index when user clicks previous or next
 document.getElementById("previous").addEventListener('click', function () {
   index = index > 0 ? index - 1 : index
+  isBrowsing = true
   updateDOM()
 });
 document.getElementById("next").addEventListener('click', function () {
   index = index < lastWatched.length - 1 ? index + 1 : index
+  isBrowsing = true
   updateDOM()
 });
 
@@ -186,12 +192,20 @@ chrome.runtime.onConnect.addListener(function (port) {
   myPort = port
   console.assert(port.name == "info");
   port.onMessage.addListener(function (msg) {
-    document.getElementById("title").innerHTML = msg.title;
-    document.getElementById("episode").innerHTML = msg.episode;
-    document.getElementById("time").innerHTML = msg.time;
-    document.getElementById("totalTime").innerHTML = msg.totalTime;
-    document.getElementById("site").innerHTML = msg.site
-    document.getElementById("track").innerHTML = msg.action
-    port.postMessage({ status: "ok" });
+    currWatching = msg.title
+    if (!isBrowsing) {
+      // get lastWatched and episode data from storage
+      chrome.storage.sync.get(null, function (result) {
+        if (result != {}) {
+          allData = result
+          if (result['lastWatched'] != undefined) {
+            lastWatched = allData['lastWatched']
+            index = lastWatched.length - 1
+            updateDOM()
+            updateBroadcastTimes()
+          }
+        }
+      });
+    }
   });
 });
