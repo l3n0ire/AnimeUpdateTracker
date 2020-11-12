@@ -154,15 +154,16 @@ setInterval(function () {
     }
     chrome.storage.sync.set({ ['lastWatched']: toStoreLW }, function () {
       console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
+      // connect to port info
+      let port = chrome.runtime.connect({ name: "info" });
+
+      // pass data for popup.js to display
+      port.postMessage({ title: title, episode: episode, time: time, totalTime: totalTime, site: site, action: 'tracking' });
+      port.onMessage.addListener(function (msg) { });
     });
   });
 
-  // connect to port info
-  let port = chrome.runtime.connect({ name: "info" });
-
-  // pass data for popup.js to display
-  port.postMessage({ title: title, episode: episode, time: time, totalTime: totalTime, site: site, action: 'tracking' });
-  port.onMessage.addListener(function (msg) { });
+  
 
 }, 5 * 1000);
 
