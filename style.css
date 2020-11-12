@@ -1,12 +1,11 @@
 body{
     width:300px;
-    height: 430px;
+    height: 360px;
     margin:0;
     padding:0;
 }
 .container{
     padding:3vw;
-    height:100%
 }
 h1,h2{
     margin: 0;
@@ -14,6 +13,7 @@ h1,h2{
 .header{
     background-color: #000;
     padding:2vw;
+    overflow:hidden
 }
 .logo{
     color:white
@@ -41,7 +41,14 @@ button{
     width:35vw;
 }
 #help{
-    margin-bottom: -1vw;
+    margin: 1vw;
+    font-size: 1em;
+    line-height: 1em;
+    background-color: #000;
+    float:right;
+}
+#version{
+    float:left;
 }
 #copyright{
     text-align: right;
@@ -60,19 +67,19 @@ p {
 #imageContainer{
     float:left;
     margin-right:3vw;
-    height: 26vh;
+    height: 11em;
     margin-bottom: 1vh;
 }
 #artwork{
     width:30vw;
-    height: 26vh;
+    height: 11em;
 }
 #lastWatchedSide h3{
     margin-top:0;
     margin-bottom:5px;
 }
 #lastWatchedSide{
-    height: 26vh;
+    height: 11em;
     margin-bottom: 1vh;
 }
 #title{
