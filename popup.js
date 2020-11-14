@@ -1,34 +1,13 @@
-// Trigger injection when user clicks track
-document.getElementById("track").addEventListener('click', async function () {
-  await chrome.runtime.sendMessage({ action: "track" },
-    function (response) {
-      let action = response.action;
-      document.getElementById("track").innerHTML = action
-    });
-
-})
-
 var lastWatched
 var allData
 var index
-var myPort
 var showHelp = false
 var isBrowsing = false
 var currWatching = ''
+var broadcastTimes = {}
+var artwork = {}
+var malIDs = {}
 
-// get lastWatched and episode data from storage
-chrome.storage.sync.get(null, function (result) {
-  if (result != {}) {
-    allData = result
-    if (result['lastWatched'] != undefined) {
-      lastWatched = allData['lastWatched']
-      index = lastWatched.length - 1
-      updateDOM()
-      updateBroadcastTimes()
-    }
-  }
-
-});
 // Generate dates
 var days = {}
 days['Mondays'] = new Date(2020, 10, 09, 0, 0, 0, 0)
@@ -41,94 +20,132 @@ days['Sundays'] = new Date(2020, 10, 15, 0, 0, 0, 0)
 
 var scheduleElement = document.getElementById("schedule")
 var artworkElement = document.getElementById("artwork")
-// broadcast times for each anime
-var broadcastTimes = {}
-// artwork for each anime
-var artwork = {}
-// malids for each anime
-var malIDs = {}
+var helpText = document.getElementsByClassName("helpText")
+
+/**
+ * Gets lastWatched and episode data from storage
+ */
+async function getDataFromStorage() {
+  await chrome.storage.sync.get(null, function (result) {
+    if (result != {}) {
+      allData = result
+      if (result['lastWatched'] != undefined) {
+        lastWatched = allData['lastWatched']
+        index = lastWatched.length - 1
+        updateBroadcastTimes()
+      }
+    }
+  });
+}
+
+getDataFromStorage()
 
 /**
  * Updates or creates the broadcastTimes object by fetching from API
  * Invokes updateDOM() to update "Last Watched" DOM
  * 
- *  @param {boolean} isDelete optional parameter which indicates if user click delete
+ *  @param {boolean} isDelete optional parameter which indicates if user clicked delete
  */
-function updateBroadcastTimes(isDelete = false) {
+async function updateBroadcastTimes(isDelete = false) {
+
+  // refresh DOM if all items are deleted
   if (isDelete && index < 0) {
     location.reload()
   }
+  if (lastWatched.length > 0) {
+    let queryName = lastWatched[index]
+    // replace spaces with %20
+    queryName.replace(" ", "%20")
 
-  let queryName = lastWatched[index]
-  // replace spaces with %20
-  queryName.replace(" ", "%20")
+    // Get malId and artwork for anime by searching by name
+    // limit results to 1
+    let res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit1`)
+    let data = await res.json()
 
-  // Get malId and artwork for anime by searching by name
-  // limit results to 1
-  fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit1`)
-    .then(res => res.json())
-    .then(data => {
-      // should only be one result
-      let resultObj = data.results[0]
-      // store malid
-      malIDs[lastWatched[index]] = resultObj.mal_id
-      // store image url 
-      artwork[lastWatched[index]] = resultObj.image_url
+    // should only be one result
+    let resultObj = data.results[0]
+    // store malid
+    malIDs[lastWatched[index]] = resultObj.mal_id
+    // store image url 
+    artwork[lastWatched[index]] = resultObj.image_url
 
-      // get broadcast date
-      fetch(`https://api.jikan.moe/v3/anime/${malIDs[lastWatched[index]]}`)
-        .then(res => res.json())
-        .then(data => {
-          // check if its airing
-          if (data.airing) {
-            // store it in broadcastTimes and update DOM
-            let timeStr = data['broadcast']
-            let hour = timeStr.substring(timeStr.indexOf(':') - 2, timeStr.indexOf(':'))
-            let min = timeStr.substring(timeStr.indexOf(':') + 1, timeStr.indexOf(':') + 3)
-            let day = timeStr.substring(0, timeStr.indexOf(' at '))
-            hour = parseInt(hour)
-            min = parseInt(min)
-            let tempDate = new Date()
-            let offset = tempDate.getTimezoneOffset();
-            // japan is utc +9
-            offset = (-9 * 60) - offset
-            // offset is in min, convert to ms
-            let dummyDate = new Date(days[day].getTime() + (offset + (hour * 60) + min) * (60 * 1000))
-            let dayOfWeek = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
-            let formattedDate = dayOfWeek[dummyDate.getDay()] + " at " + dummyDate.toLocaleTimeString([], { timeStyle: 'short' })
-            broadcastTimes[lastWatched[index]] = formattedDate
-          }
-          // completed series
-          else {
-            broadcastTimes[lastWatched[index]] = null
-            scheduleElement.innerHTML = null
-          }
-          console.log("1 " + lastWatched[index])
-          updateDOM()
-        });
-    });
+    // get broadcast date
+    res = await fetch(`https://api.jikan.moe/v3/anime/${malIDs[lastWatched[index]]}`)
+    data = await res.json()
+
+    // check if its airing
+    if (data.airing) {
+      // convert JST to local time and store in broadcastTimes
+      broadcastTimes[lastWatched[index]] = convertJST(data['broadcast'])
+    }
+    // completed series
+    else {
+      // should be null since series is completed
+      broadcastTimes[lastWatched[index]] = null
+      scheduleElement.innerHTML = null
+    }
+  }
+  // update DOM with new data
+  updateDOM()
 }
 
+/**
+ * Returns JST broadcast time to converted to local time as a string
+ * Input string timeStr and output string are follow the format below
+ * [day of week] at XX:XX [AM/PM]
+ * 
+ * @param {string} timeStr string representing JST broadcast time
+ */
+function convertJST(timeStr) {
+
+  // parse TimeStr
+  let hour = timeStr.substring(timeStr.indexOf(':') - 2, timeStr.indexOf(':'))
+  let min = timeStr.substring(timeStr.indexOf(':') + 1, timeStr.indexOf(':') + 3)
+  let day = timeStr.substring(0, timeStr.indexOf(' at '))
+  hour = parseInt(hour)
+  min = parseInt(min)
+
+  // get user's timezone offset
+  let tempDate = new Date()
+  let offset = tempDate.getTimezoneOffset();
+
+  // japan is utc +9
+  offset = (-9 * 60) - offset
+
+  // offset is in min, convert to ms
+  let dummyDate = new Date(days[day].getTime() + (offset + (hour * 60) + min) * (60 * 1000))
+  let dayOfWeek = ['Sundays', 'Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays'];
+
+  return dayOfWeek[dummyDate.getDay()] + " at " + dummyDate.toLocaleTimeString([], { timeStyle: 'short' })
+
+}
 
 /**
  * Update "Last Watched" DOM with latest data
  *  
  */
 function updateDOM() {
+  if (lastWatched.length > 0) {
+    // for currently airing update broadcast time
+    if (lastWatched[index] in broadcastTimes)
+      scheduleElement.innerHTML = broadcastTimes[lastWatched[index]]
 
-  console.log("2 " + lastWatched[index])
-  // for currently airing update broadcast time
-  if (lastWatched[index] in broadcastTimes)
-    scheduleElement.innerHTML = broadcastTimes[lastWatched[index]]
-
-  artworkElement.src = artwork[lastWatched[index]]
-  document.querySelector('.sectionLabel').innerHTML = lastWatched[index] == currWatching ? "Currently Watching" : "Last Watched"
-  document.getElementById('lastWatched').innerHTML = lastWatched[index]
-  let episodeObj = allData[lastWatched[index]]
-  document.getElementById('lastWatchedEpisode').innerHTML = episodeObj.episode
-  document.getElementById('lastWatchedTime').innerHTML = episodeObj.time
-  document.getElementById('lastWatchedTotalTime').innerHTML = episodeObj.totalTime
-  document.getElementById('lastWatchedSite').innerHTML = episodeObj.site
+    artworkElement.src = artwork[lastWatched[index]]
+    document.querySelector('.sectionLabel').innerHTML = lastWatched[index] == currWatching ? "Currently Watching" : "Last Watched"
+    document.getElementById('lastWatched').innerHTML = lastWatched[index]
+    let episodeObj = allData[lastWatched[index]]
+    document.getElementById('lastWatchedEpisode').innerHTML = episodeObj.episode
+    document.getElementById('lastWatchedTime').innerHTML = episodeObj.time
+    document.getElementById('lastWatchedTotalTime').innerHTML = episodeObj.totalTime
+    document.getElementById('lastWatchedSite').innerHTML = episodeObj.site
+  }
+  else {
+    // display help text if user is not tracking anything
+    for (let e of helpText) {
+      e.style.display = "block"
+    }
+    showHelp = !showHelp
+  }
 
 }
 
@@ -145,8 +162,19 @@ document.getElementById("next").addEventListener('click', function () {
   updateBroadcastTimes()
 });
 
+// Trigger injection when user clicks track
+document.getElementById("track").addEventListener('click', async function () {
+  await chrome.runtime.sendMessage({ action: "track" },
+    function (response) {
+      let action = response.action;
+      document.getElementById("track").innerHTML = action
+    });
+
+})
+
 document.getElementById("delete").addEventListener('click', async function () {
-  if (lastWatched[index] != currWatching) {
+  // disable delete for currWatching and empty last watched
+  if (lastWatched[index] != currWatching && lastWatched.length > 0) {
     // ask user for confirmation
     let toDelete = confirm("Are you sure you want delete this anime from Last Watched?")
     if (toDelete) {
@@ -171,7 +199,8 @@ document.getElementById("delete").addEventListener('click', async function () {
 
 // trigger resume action in background.js
 document.getElementById("resume").addEventListener('click', async function () {
-  if (lastWatched[index] != currWatching) {
+  // disable delete for currWatching and empty last watched
+  if (lastWatched[index] != currWatching && lastWatched.length > 0) {
     chrome.runtime.sendMessage({ action: 'resume', title: lastWatched[index] },
       function (response) { });
   }
@@ -179,7 +208,6 @@ document.getElementById("resume").addEventListener('click', async function () {
 
 // show help text
 document.getElementById("help").addEventListener('click', function () {
-  let helpText = document.getElementsByClassName("helpText")
   for (let e of helpText) {
     e.style.display = !showHelp ? "block" : "none"
   }
@@ -188,24 +216,13 @@ document.getElementById("help").addEventListener('click', function () {
 
 // update "Currently Watching" DOM when message is received from foreground.js 
 chrome.runtime.onConnect.addListener(function (port) {
-  myPort = port
   console.assert(port.name == "info");
   port.onMessage.addListener(function (msg) {
     currWatching = msg.title
     document.getElementById("track").innerHTML = msg.action
     if (!isBrowsing) {
       // get lastWatched and episode data from storage
-      chrome.storage.sync.get(null, function (result) {
-        if (result != {}) {
-          allData = result
-          if (result['lastWatched'] != undefined) {
-            lastWatched = allData['lastWatched']
-            index = lastWatched.length - 1
-            console.log("get " + lastWatched[index])
-            updateBroadcastTimes()
-          }
-        }
-      });
+      getDataFromStorage()
     }
   });
 });
