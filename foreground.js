@@ -117,20 +117,36 @@ function setTime(videoPlayer) {
 
 }
 
-setInterval(function () {
+var isMALUpdated = false
+var isMALComplete = false
+var malUpdateStatus =""
+
+setInterval(async function () {
+  let videoElement=""
+  
+
   // get time from video players
   if (site == 'Anime Update') {
     let videoPlayer = document.querySelector(".nav.nav-tabs.hometab .active a").innerHTML
     console.log("time " + videoPlayer)
+    videoElement = 'video'
     // sets time and totalTime from video player data 
     setTime(videoPlayer)
+
   }
   else if (site == '4anime') {
     time = document.querySelector('.vjs-current-time-display').innerHTML
     time = time.substring(time.lastIndexOf('>') + 1)
     totalTime = document.querySelector('.vjs-duration-display').innerHTML
     totalTime = totalTime.substring(totalTime.lastIndexOf(' ') + 1)
+    videoElement = '#example_video_1_html5_api'
   }
+  // set video element
+  videoElement = document.querySelector(videoElement)
+  // calculate progress
+  // -1 means duration is 0
+  let progress = videoElement.duration != 0 ? videoElement.currentTime / videoElement.duration : -1
+
   let toStore
   var toStoreLW = []
 
@@ -139,7 +155,7 @@ setInterval(function () {
   chrome.storage.sync.set({ [title]: toStore }, function () {
     console.log('added ' + title + " " + episode + " " + time + "/" + totalTime)
   });
-
+  
   // update last watched
   chrome.storage.sync.get(['lastWatched'], function (result) {
     if (result['lastWatched'] == undefined) {
@@ -158,14 +174,34 @@ setInterval(function () {
       let port = chrome.runtime.connect({ name: "info" });
 
       // pass data for popup.js to display
-      port.postMessage({ title: title, episode: episode, time: time, totalTime: totalTime, site: site, action: 'tracking' });
+      port.postMessage({ title: title, episode: episode, time: time, totalTime: totalTime, site: site, malUpdateStatus: malUpdateStatus, action: 'tracking' });
       port.onMessage.addListener(function (msg) { });
     });
   });
 
+  // each injection can only update user's MAl once
+  // each time a new episode is loaded a new foregroundjs is injected
+  if(!isMALUpdated){
+    isMALUpdated = true
+    chrome.runtime.sendMessage({ action: 'UpdateMAL',title:title,  episode: episode , isComplete:false },
+      function (response) {
+        malUpdateStatus = response.action
+       });
+  }
+  else if(isMALUpdated && !isMALComplete && progress>0.9){
+    isMALComplete = true
+    chrome.runtime.sendMessage({ action: 'UpdateMAL',title:title,  episode: episode , isComplete:true },
+      function (response) {
+        malUpdateStatus = response.action
+       });
+
+  }
+
+
   
 
-}, 5 * 1000);
+},5 * 1000);
+
 
 
 
