@@ -208,6 +208,7 @@ document.getElementById("resume").addEventListener('click', async function () {
 
 chrome.storage.sync.get(['userAuthCode'], function (result) {
   document.getElementById("MAL").innerHTML =  result['userAuthCode'] != undefined? "Logged in": "Login"
+  document.getElementById("MAL").disabled = result['userAuthCode'] != undefined
   if(result['userAuthCode'] != undefined){
     chrome.runtime.sendMessage({ action: 'getUserAccessToken'},
     function (response) { });
