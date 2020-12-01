@@ -22,6 +22,11 @@ For developers
 3. Click "Start Tracking" to track that episode
 4. Wait 2 sec and the episode you are tracking will appear in the "Currently Watching" section
 
+#### MAL
+1. Click login button to sign into MAL
+2. A new tab will open asking you for access. Click "Allow"
+3. Now all the anime you track will automatically update your MAL
+
 #### Last watched
 - The most recently watched episode will appear in the "Last Watched" section
 - Use "Previous" and "Next" buttons to cycle through the anime you have tracked

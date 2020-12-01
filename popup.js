@@ -206,6 +206,25 @@ document.getElementById("resume").addEventListener('click', async function () {
   }
 });
 
+chrome.storage.sync.get(['userAuthCode'], function (result) {
+  document.getElementById("MAL").innerHTML =  result['userAuthCode'] != undefined? "Logged in": "Login"
+  if(result['userAuthCode'] != undefined){
+    chrome.runtime.sendMessage({ action: 'getUserAccessToken'},
+    function (response) { });
+  }
+
+});
+
+// trigger resume action in background.js
+document.getElementById("MAL").addEventListener('click', async function () {
+  
+    chrome.runtime.sendMessage({ action: 'MALLogin'},
+      function (response) { });
+    console.log('clicked')
+  
+});
+
+
 // show help text
 document.getElementById("help").addEventListener('click', function () {
   for (let e of helpText) {
@@ -220,6 +239,8 @@ chrome.runtime.onConnect.addListener(function (port) {
   port.onMessage.addListener(function (msg) {
     currWatching = msg.title
     document.getElementById("track").innerHTML = msg.action
+    if(msg.malUpdateStatus!="")
+      document.getElementById("malUpdateStatus").innerHTML = msg.malUpdateStatus
     if (!isBrowsing) {
       // get lastWatched and episode data from storage
       getDataFromStorage()
