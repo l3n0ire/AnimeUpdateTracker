@@ -31,6 +31,7 @@ For developers
 - The most recently watched episode will appear in the "Last Watched" section
 - Use "Previous" and "Next" buttons to cycle through the anime you have tracked
 - "Resume" will open that episode in a new tab and will set the video to where you last left off. For 4anime.to, click play for this to take affect.
+- "Next episode" will open the next episode in a new tab. Note this is availible when the next episode is availible on the site at the time of watching. It will not appear when a new episode is uploaded (This may be added in the future).
 - "Delete" will remove that episode from "Last Watched" and it will no longer appear when cycling through the anime you have tracked
 
 ## Issues

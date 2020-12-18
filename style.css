@@ -1,5 +1,5 @@
 body{
-    width:300px;
+    width:280px;
     height: 360px;
     margin:0;
     padding:0;
@@ -40,7 +40,7 @@ button{
 #track{
     width:35vw;
 }
-#help{
+#help, #MAL{
     margin: 1vw;
     font-size: 1em;
     line-height: 1em;
@@ -87,6 +87,12 @@ p {
 }
 .sectionLabel{
     margin:2vh 0;
+}
+#next{
+    float:right;
+}
+#nextEpisode{
+    display:none;
 }
 
 

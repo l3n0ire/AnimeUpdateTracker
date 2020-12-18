@@ -117,6 +117,9 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     else if (action === 'MALLogin') {
         promptMALLogin()
     }
+    else if (action === 'MALLogOut') {
+        promptMALLogOut()
+    }
     else if (action === 'getUserAccessToken') {
         getUserAuthCode()
     }
@@ -138,6 +141,18 @@ async function promptMALLogin(){
     chrome.tabs.create({ "url": userAuthURL }, function (tab) {
 
     });
+}
+async function promptMALLogOut(){
+    CLIENT_ID = undefined
+    codeVerifier = undefined
+    userAccessToken = undefined
+    userAuthCode = undefined
+    chrome.storage.sync.set({'userAuthCode':null}, function(){
+        console.log("logged out")
+        chrome.storage.sync.get(['userAuthCode'], function (result) {
+            console.log(result['userAuthCode'])
+        })
+    })
 }
 async function getUserAuthCode(){
     chrome.storage.sync.get(['userAuthCode'], async function (result) {

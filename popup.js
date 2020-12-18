@@ -138,6 +138,12 @@ function updateDOM() {
     document.getElementById('lastWatchedTime').innerHTML = episodeObj.time
     document.getElementById('lastWatchedTotalTime').innerHTML = episodeObj.totalTime
     document.getElementById('lastWatchedSite').innerHTML = episodeObj.site
+    if(episodeObj.nextEpisodeLink != undefined && episodeObj.nextEpisodeLink != ""){
+      document.getElementById('nextEpisode').style.display = "inline-block"
+    }
+    else{
+      document.getElementById('nextEpisode').style.display = "none"
+    }
   }
   else {
     // display help text if user is not tracking anything
@@ -206,8 +212,17 @@ document.getElementById("resume").addEventListener('click', async function () {
   }
 });
 
+document.getElementById("nextEpisode").addEventListener('click', () => {
+  let url = allData[lastWatched[index]].nextEpisodeLink;
+  chrome.tabs.create({ "url": url }, function (tab) {});
+  chrome.runtime.sendMessage({ action: 'nextEpisode' }, (response) => { });
+}, false)
+
+
+// Login button Text
 chrome.storage.sync.get(['userAuthCode'], function (result) {
-  document.getElementById("MAL").innerHTML =  result['userAuthCode'] != undefined? "Logged in": "Login"
+  console.log(result['userAuthCode'])
+  document.getElementById("MAL").innerHTML =  result['userAuthCode'] != undefined ? "Log Out": "Login"
   if(result['userAuthCode'] != undefined){
     chrome.runtime.sendMessage({ action: 'getUserAccessToken'},
     function (response) { });
@@ -215,12 +230,23 @@ chrome.storage.sync.get(['userAuthCode'], function (result) {
 
 });
 
-// trigger resume action in background.js
+// Login button
 document.getElementById("MAL").addEventListener('click', async function () {
-  
+  let elem = document.getElementById("MAL")
+  if(elem.innerHTML == "Login"){
     chrome.runtime.sendMessage({ action: 'MALLogin'},
       function (response) { });
-    console.log('clicked')
+  }
+  else if(elem.innerHTML == "Log Out"){
+    // ask user for confirmation
+    let toLogout = confirm("Are you sure you want to Log Out?")
+    if(toLogout){
+    chrome.runtime.sendMessage({ action: 'MALLogOut'},
+      function (response) {
+        elem.innerHTML="Login"
+       });
+    }
+  }
   
 });
 
