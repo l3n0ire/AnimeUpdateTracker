@@ -77,6 +77,7 @@ if (toTrackButtons != undefined) {
  * Removes value from arr
  * @param {array} arr The array to remove from
  * @param {string} value The value of the element to be removed
+ * @returns {array} The array with value removed
  */
 function remover(arr, value) {
   for (let i = 0; i < arr.length; i++) {
@@ -116,6 +117,24 @@ function setTime(videoPlayer) {
   totalTime = document.querySelector(totalTimeElement).innerHTML
 
 }
+/**
+ * Gets the link to the next episode if it exists
+ * 
+ * @returns {string} The next episode link. if link does not exist, then "" is returned
+ */
+function getNextEpisodeLink(){
+  let nextEpisodeLink = ""
+  if(site == 'Anime Update'){
+    let linkButtons = document.querySelectorAll('.btn-group a')
+    // the next episode button is the third one
+    nextEpisodeLink = linkButtons.length == 3? linkButtons[2].href : ""
+  }
+  else if(site == '4anime'){
+    if(document.querySelector('.anipager-next a') != undefined)
+      nextEpisodeLink = document.querySelector('.anipager-next a').href
+  }
+  return nextEpisodeLink
+}
 
 var isMALUpdated = false
 var isMALComplete = false
@@ -149,9 +168,11 @@ setInterval(async function () {
 
   let toStore
   var toStoreLW = []
+  // get next episode link
+  let nextEpisodeLink = getNextEpisodeLink()
 
   // store current episode in storage
-  toStore = { "episode": episode, "time": time, "totalTime": totalTime, "url": url, "site": site }
+  toStore = { "episode": episode, "time": time, "totalTime": totalTime, "url": url, "site": site, "nextEpisodeLink":nextEpisodeLink }
   chrome.storage.sync.set({ [title]: toStore }, function () {
     console.log('added ' + title + " " + episode + " " + time + "/" + totalTime)
   });
@@ -178,24 +199,27 @@ setInterval(async function () {
       port.onMessage.addListener(function (msg) { });
     });
   });
-
-  // each injection can only update user's MAl once
-  // each time a new episode is loaded a new foregroundjs is injected
-  if(!isMALUpdated){
-    isMALUpdated = true
-    chrome.runtime.sendMessage({ action: 'UpdateMAL',title:title,  episode: episode , isComplete:false },
-      function (response) {
-        malUpdateStatus = response.action
-       });
-  }
-  else if(isMALUpdated && !isMALComplete && progress>0.9){
-    isMALComplete = true
-    chrome.runtime.sendMessage({ action: 'UpdateMAL',title:title,  episode: episode , isComplete:true },
-      function (response) {
-        malUpdateStatus = response.action
-       });
-
-  }
+  // check if user is logged in
+  chrome.storage.sync.get(['userAuthCode'], function (result) {
+    if(result['userAuthCode']!=undefined){
+      // each injection can only update user's MAl once
+      // each time a new episode is loaded a new foregroundjs is injected
+      if(!isMALUpdated){
+        isMALUpdated = true
+        chrome.runtime.sendMessage({ action: 'UpdateMAL',title:title,  episode: episode , isComplete:false },
+          function (response) {
+            malUpdateStatus = response.action
+          });
+      }
+      else if(isMALUpdated && !isMALComplete && progress>0.9){
+        isMALComplete = true
+        chrome.runtime.sendMessage({ action: 'UpdateMAL',title:title,  episode: episode , isComplete:true },
+          function (response) {
+            malUpdateStatus = response.action
+          });
+      }
+    }
+  });
 
 
   

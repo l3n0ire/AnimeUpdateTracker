@@ -13,16 +13,20 @@
     <h1 class="logo">
       Anime <span class="update">Update</span> Tracker
     </h1>
-  <h1 class="logo" id ="version">(0.7)</h1>
+  <h1 class="logo" id ="version">(0.9)</h1>
     <button id="help">Help</button>
+    <button id="MAL">MAL</button>
   </div>
   <div class="container">
     <p class="helpText">Click "Start Tracking" on the episode you're watching</p>
     <p class="helpText">Click "Previous" and "Next" to cycle through the anime you're tracking</p>
     <p class="helpText">Click "Login" then "Allow" when prompted to enable MAL synchronization</p>
+
+    <button id="previous"><i class="fas fa-chevron-left"></i>Previous</button>
+    <button id="next">Next<i class="fas fa-chevron-right"></i></button>
+
     <h3 class="sectionLabel">Last Watched</h3>
-    <button id="MAL">MAL</button>
-    <p id ="malUpdateStatus">Status:</p>
+    <p id ="malUpdateStatus"></p>
     <div class="lastWatchedContainer">
       <div id="imageContainer">
         <img src="" id="artwork" />
@@ -38,9 +42,9 @@
           <p id="lastWatchedTotalTime">00:00</p>
         </div>
       </div>
+      
       <button id="resume">Resume</button>
-      <button id="previous"><i class="fas fa-chevron-left"></i> Previous</button>
-      <button id="next">Next <i class="fas fa-chevron-right"></i></button>
+      <button id="nextEpisode">Next episode</button>
       <button id="delete"><i class="fas fa-trash"></i> Delete</button>
     </div>
     <button id="track">Start Tracking</button>
