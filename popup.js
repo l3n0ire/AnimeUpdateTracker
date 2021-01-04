@@ -8,6 +8,15 @@ var broadcastTimes = {}
 var artwork = {}
 var malIDs = {}
 
+// popup alerts
+chrome.storage.sync.get(['seenUpdate'],function(result){
+  if(!result['seenUpdate']){
+    confirm("MAL sync has been fixed. Please login again if you want to use it")
+    chrome.storage.sync.set({'seenUpdate':true})
+  }
+
+})
+
 // Generate dates
 var days = {}
 days['Mondays'] = new Date(2020, 10, 09, 0, 0, 0, 0)
@@ -273,3 +282,4 @@ chrome.runtime.onConnect.addListener(function (port) {
     }
   });
 });
+
