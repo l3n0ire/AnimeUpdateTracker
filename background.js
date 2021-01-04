@@ -6,6 +6,23 @@ var CLIENT_ID
 var userAccessToken
 var userAuthCode
 var codeVerifier
+var clearedUserTokens = false;
+
+chrome.storage.sync.set({'seenUpdate':false});
+
+if(!clearedUserTokens){
+    chrome.storage.sync.get(['userAuthCode','userAcessToken'], function(result){
+        if(result['userAuthCode']!=undefined || result['userAccessToken']!=undefined){
+            chrome.storage.sync.remove(['userAuthCode','userAccessToken'], function(){
+                userAuthCode =undefined;
+                console.log("cleared User Tokens")
+            })
+        }
+        clearedUserTokens =true;
+        
+    })
+}
+
 
 chrome.tabs.onActivated.addListener(tab => {
     chrome.tabs.get(tab.tabId, tab_info => {
@@ -15,8 +32,8 @@ chrome.tabs.onActivated.addListener(tab => {
 async function getSecrets(){
     let res = await fetch("https://secrets-rest.herokuapp.com/MAL")
     let data = await res.json()
-    CLIENT_ID = data.CLIENT_ID
-    codeVerifier = data.CODE_VERIFIER
+    CLIENT_ID = await data.CLIENT_ID
+    codeVerifier = await data.CODE_VERIFIER
 }
 
 // inject forground.js if current page refresh
@@ -115,10 +132,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         response = 'nextEpisode'
     }
     else if (action === 'MALLogin') {
-        promptMALLogin()
+        await promptMALLogin()
     }
     else if (action === 'MALLogOut') {
-        promptMALLogOut()
+        await promptMALLogOut()
     }
     else if (action === 'getUserAccessToken') {
         getUserAuthCode()
@@ -136,6 +153,7 @@ async function promptMALLogin(){
         await getSecrets();
     }
     let codeChallenge = codeVerifier
+    console.log("clientid "+CLIENT_ID)
     let userAuthURL = `https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&code_challenge=${codeChallenge}`
     // open episode in new tab
     chrome.tabs.create({ "url": userAuthURL }, function (tab) {
@@ -168,11 +186,11 @@ async function getUserAccessToken(){
     if (userAccessToken == undefined){
         chrome.storage.sync.get(['userAccessToken'], async function (result) {
             console.log(result)
-            if(result['userAccessToken'] == undefined){
+            if(result['userAccessToken'] == undefined || result['userAccessToken'] == {}){
                 let url ="https://myanimelist.net/v1/oauth2/token"
                 let params = new URLSearchParams()
                 params.append('client_id', CLIENT_ID)
-                params.append('client_secret', "")
+                params.append('client_secret', '')
                 params.append('grant_type', 'authorization_code')
                 params.append('code', userAuthCode)
                 params.append('code_verifier', codeVerifier)
@@ -187,7 +205,11 @@ async function getUserAccessToken(){
                 let data = await res.json()
                 userAccessToken = data
                 chrome.storage.sync.set({'userAccessToken':data}, function(){
+                    console.log(CLIENT_ID+" "+userAuthCode+"\n"+codeVerifier)
+                    console.log(data)
                     console.log("saved userAccessToken")
+                    // refresh token after 10 days 
+                    setTimeout(refreshToken,10 * 24 * 60 * 1000)
                 })
             }
             else{
@@ -197,6 +219,40 @@ async function getUserAccessToken(){
         });
     }
     
+}
+async function refreshToken (){
+    chrome.storage.sync.get(['userAccessToken'], async function (result) {
+        if(result['userAccessToken']!= undefined){
+            let params = new URLSearchParams()
+            console.log(CLIENT_ID)
+            params.append('client_id', CLIENT_ID)
+            params.append('client_secret', "")
+            params.append('grant_type', 'refresh_token')
+            params.append('refresh_token', result['userAccessToken'].refresh_token)
+            let url ="https://myanimelist.net/v1/oauth2/token"
+
+            let res = await fetch(url,{
+                method: 'POST',
+                headers: {
+                    'Content-Type':'application/x-www-form-urlencoded'
+                },
+                body: params
+            })
+            let data = await res.json()
+            console.log(data)
+            if(res.status == 200){
+                userAccessToken = data
+                
+                chrome.storage.sync.set({'userAccessToken':data}, function(){
+                    console.log("refreshed userAccessToken")
+                    setTimeout(refreshToken,10 * 24 * 60 * 1000)
+                })
+            }
+        }
+
+    });
+
+
 }
 
 async function updateMAL(title,episode,isComplete){
@@ -215,6 +271,8 @@ async function updateMAL(title,episode,isComplete){
               'Authorization':`Bearer ${access_token}`,
           },
         })
+
+
         let data = await res.json()
         let id = await data.data[0].node.id
         let numEpisodes = await data.data[0].node['num_episodes']
@@ -240,7 +298,10 @@ async function updateMAL(title,episode,isComplete){
           },
           body: reqBody
         })
+        
+
         data = await res.json()
+
       }
       else
         return 'MAL not updated'
