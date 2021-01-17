@@ -3,6 +3,7 @@ var allData
 var index
 var showHelp = false
 var isBrowsing = false
+var isDarkModeOn = false;
 var currWatching = ''
 var broadcastTimes = {}
 var artwork = {}
@@ -195,14 +196,14 @@ document.getElementById("delete").addEventListener('click', async function () {
     if (toDelete) {
       // remove the current item from storage
       chrome.storage.sync.remove([lastWatched[index]], function () {
-        console.log("deleted from storage")
+        //console.log("deleted from storage")
       });
       // remove the current item from lastWatched
       lastWatched.splice(index, 1)
-      console.log(lastWatched)
+      //console.log(lastWatched)
       // store updated lastWatched in storage
       chrome.storage.sync.set({ ['lastWatched']: lastWatched }, function () {
-        console.log("deleted from lastWatched")
+        //console.log("deleted from lastWatched")
       });
       // set index to end of lastWatched array
       index = lastWatched.length - 1
@@ -230,7 +231,7 @@ document.getElementById("nextEpisode").addEventListener('click', () => {
 
 // Login button Text
 chrome.storage.sync.get(['userAuthCode'], function (result) {
-  console.log(result['userAuthCode'])
+  //console.log(result['userAuthCode'])
   document.getElementById("MAL").innerHTML =  result['userAuthCode'] != undefined ? "Log Out": "Login"
   if(result['userAuthCode'] != undefined){
     chrome.runtime.sendMessage({ action: 'getUserAccessToken'},
@@ -268,6 +269,32 @@ document.getElementById("help").addEventListener('click', function () {
   showHelp = !showHelp
 });
 
+// check if isDarkModeOn exists
+// if not set it to false
+chrome.storage.sync.get(["isDarkModeOn"], function(result){
+  if(result['isDarkModeOn'] == undefined){
+    chrome.storage.sync.set({"isDarkModeOn":false});
+  }
+  else{
+    isDarkModeOn = result['isDarkModeOn']
+  }
+  toggleDarkMode();
+});
+
+
+// darkmode 
+document.getElementById("darkMode").addEventListener('click', async function () {
+  isDarkModeOn = ! isDarkModeOn
+  toggleDarkMode();
+  chrome.storage.sync.set({"isDarkModeOn":isDarkModeOn});
+});
+function toggleDarkMode(){
+  if(isDarkModeOn)
+    document.querySelector(".container").classList.add("darkmode");
+  else{
+    document.querySelector(".container").classList.remove("darkmode");
+  }
+}
 // update "Currently Watching" DOM when message is received from foreground.js 
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name == "info");

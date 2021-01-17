@@ -1,6 +1,6 @@
 body{
     width:280px;
-    height: 360px;
+    height: 340px;
     margin:0;
     padding:0;
 }
@@ -29,23 +29,26 @@ h1,h2{
     box-shadow: 1px 1px 7px#d8d8d8;
 }
 button{
-    background-color: #467caf;
+    background-color:#467caf ;
     color:#fff;
-    border: none;
+    border:none;
     height:10vw;
-    padding: 2vw;
+    padding: 2vw 2.2vw;
     border-radius: 4px;
-    margin: 1vw 0;
+    margin: 1vw 0.2vw;
 }
 #track{
     width:35vw;
 }
-#help, #MAL{
+.headerButtons{
+    
+    float:right;
+}
+.headerButtons button{
     margin: 1vw;
     font-size: 1em;
     line-height: 1em;
     background-color: #000;
-    float:right;
 }
 #version{
     float:left;
@@ -88,13 +91,30 @@ p {
 .sectionLabel{
     margin:2vh 0;
 }
-#next{
-    float:right;
-}
+
 #nextEpisode{
     display:none;
 }
 
+.darkmode .watching, .darkmode .lastWatchedContainer{
+    border: 1px solid #30363d;
+    background-color:#000;
+    box-shadow: none;
+    color:#fff;
+}
+.darkmode button{
+    /*#467caf*/
+    background-color:#21262d ;
+    color:#fff;
+    border: 1px solid #30363d; 
+    margin: 1vw 0vw;
 
+}
+.darkmode a:visited, .darkmode a{
+    color:#fff;
+}
+.darkmode.container{
+    background-color:#0D1117;
+    color:#fff;
 
-
+}

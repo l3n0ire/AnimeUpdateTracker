@@ -6,27 +6,62 @@ var CLIENT_ID
 var userAccessToken
 var userAuthCode
 var codeVerifier
-var clearedUserTokens = false;
+var addData
+var lastWatched
 
-chrome.storage.sync.set({'seenUpdate':false});
+chrome.storage.sync.get(['seenUpdate'], function(result){
+    if(result['seenUpdate'] == undefined || result['seenUpdate'] == false ){
+        chrome.storage.sync.set({'seenUpdate':false}, function(){
+            clearUserTokens();
+        });
+    }
+})
 
-if(!clearedUserTokens){
+function clearUserTokens(){
     chrome.storage.sync.get(['userAuthCode','userAcessToken'], function(result){
         if(result['userAuthCode']!=undefined || result['userAccessToken']!=undefined){
             chrome.storage.sync.remove(['userAuthCode','userAccessToken'], function(){
                 userAuthCode =undefined;
-                console.log("cleared User Tokens")
+                //console.log("cleared User Tokens")
             })
         }
-        clearedUserTokens =true;
+        needToClearUserTokens =false;
         
     })
 }
 
+async function updateAddData (){
+    
+    await chrome.storage.sync.get(null, function (result) {
+        if(result!={}){
+            addData=result
+            if(result.lastWatched!=undefined){
+                lastWatched=result.lastWatched;
+            }
+        }
+    });
+}
+updateAddData ();
+
+async function handleInjection(url){
+    await updateAddData();
+    for(let i=0;i<lastWatched.length;i++){
+        let trackedUrl = addData[lastWatched[i]].url;
+        if(url == trackedUrl || url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('episode')+7)) >=0){
+            setTimeout(injector,1000,'./foreground.js');
+            break;
+        }
+    }
+
+}
 
 chrome.tabs.onActivated.addListener(tab => {
     chrome.tabs.get(tab.tabId, tab_info => {
     })
+})
+
+chrome.tabs.onCreated.addListener(tab => {
+    handleInjection(tab.url);
 })
 
 async function getSecrets(){
@@ -40,15 +75,15 @@ async function getSecrets(){
 chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
     // if nextEpisode is true then user navigated to next episode
     // start tracking
-    if (tab.active && change.url && nextEpisode) {
-        injector('./foreground.js')
-        nextEpisode = false
+    if (tab.active && change.url ) {
+        handleInjection(change.url);
+        //nextEpisode = false
     }
     else if(tab.active && change.url && change.url.indexOf("http://localhost/oauth")>=0){
         userAuthCode = change.url.substring(change.url.indexOf("code=")+5)
         // store user auth code
         chrome.storage.sync.set({'userAuthCode':userAuthCode}, function(){
-            console.log("saved userAuthCode")
+            //console.log("saved userAuthCode")
             // close the tab
             chrome.tabs.remove(tab.id)
             getUserAccessToken()
@@ -88,7 +123,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         // inject foreground.js into the current tab when user clicks "Start Tracking"
         chrome.tabs.getSelected(null, (tab) => {
             if (checkURL(tab.url)) {
-                console.log("ran")
+                //console.log("ran")
                 injector('./foreground.js')
             }
         });
@@ -119,7 +154,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                 // set video to where user last left off
                 setTimeout(function () { chrome.tabs.executeScript(null, { code: `document.querySelector('${videoElement}').currentTime=${time}` }) }, delay)
                 // start tracking the current episode
-                setTimeout(function () { injector('./foreground.js') }, delay)
+                //setTimeout(function () { injector('./foreground.js') }, delay)
             })
         });
 
@@ -127,7 +162,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
     }
     else if (action === 'nextEpisode') {
         // trigger nextEpisode event
-        console.log('nextEpisode')
+        //console.log('nextEpisode')
         nextEpisode = true
         response = 'nextEpisode'
     }
@@ -149,11 +184,11 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 
 async function promptMALLogin(){
     if(CLIENT_ID == undefined || codeVerifier == undefined){
-        console.log("called")
+       // console.log("called")
         await getSecrets();
     }
     let codeChallenge = codeVerifier
-    console.log("clientid "+CLIENT_ID)
+    //console.log("clientid "+CLIENT_ID)
     let userAuthURL = `https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=${CLIENT_ID}&code_challenge=${codeChallenge}`
     // open episode in new tab
     chrome.tabs.create({ "url": userAuthURL }, function (tab) {
@@ -166,9 +201,9 @@ async function promptMALLogOut(){
     userAccessToken = undefined
     userAuthCode = undefined
     chrome.storage.sync.set({'userAuthCode':null}, function(){
-        console.log("logged out")
+        //console.log("logged out")
         chrome.storage.sync.get(['userAuthCode'], function (result) {
-            console.log(result['userAuthCode'])
+            //console.log(result['userAuthCode'])
         })
     })
 }
@@ -185,7 +220,7 @@ async function getUserAccessToken(){
     // check if userAccessToken Exists
     if (userAccessToken == undefined){
         chrome.storage.sync.get(['userAccessToken'], async function (result) {
-            console.log(result)
+            //console.log(result)
             if(result['userAccessToken'] == undefined || result['userAccessToken'] == {}){
                 let url ="https://myanimelist.net/v1/oauth2/token"
                 let params = new URLSearchParams()
@@ -205,16 +240,16 @@ async function getUserAccessToken(){
                 let data = await res.json()
                 userAccessToken = data
                 chrome.storage.sync.set({'userAccessToken':data}, function(){
-                    console.log(CLIENT_ID+" "+userAuthCode+"\n"+codeVerifier)
+                    /*console.log(CLIENT_ID+" "+userAuthCode+"\n"+codeVerifier)
                     console.log(data)
-                    console.log("saved userAccessToken")
+                    console.log("saved userAccessToken")*/
                     // refresh token after 10 days 
                     setTimeout(refreshToken,10 * 24 * 60 * 1000)
                 })
             }
             else{
                 userAccessToken = result['userAccessToken']
-                console.log("got from storage")
+                //console.log("got from storage")
             }
         });
     }
@@ -224,7 +259,7 @@ async function refreshToken (){
     chrome.storage.sync.get(['userAccessToken'], async function (result) {
         if(result['userAccessToken']!= undefined){
             let params = new URLSearchParams()
-            console.log(CLIENT_ID)
+            //console.log(CLIENT_ID)
             params.append('client_id', CLIENT_ID)
             params.append('client_secret', "")
             params.append('grant_type', 'refresh_token')
@@ -239,12 +274,12 @@ async function refreshToken (){
                 body: params
             })
             let data = await res.json()
-            console.log(data)
+            //console.log(data)
             if(res.status == 200){
                 userAccessToken = data
                 
                 chrome.storage.sync.set({'userAccessToken':data}, function(){
-                    console.log("refreshed userAccessToken")
+                   // console.log("refreshed userAccessToken")
                     setTimeout(refreshToken,10 * 24 * 60 * 1000)
                 })
             }
@@ -256,7 +291,7 @@ async function refreshToken (){
 }
 
 async function updateMAL(title,episode,isComplete){
-    console.log('updateMal ran')
+    //console.log('updateMal ran')
     // update user's MAL
       if(userAccessToken != undefined && userAuthCode != undefined ){
         let access_token = userAccessToken['access_token']
@@ -284,7 +319,7 @@ async function updateMAL(title,episode,isComplete){
 
         // set status to completed when user finishes last episode
         let status = numEpisodes>0 && watchedEpisodes == numEpisodes && isComplete? 'completed' : 'watching'
-        console.log(data.data[0].node)
+        //console.log(data.data[0].node)
   
         let reqBody=new URLSearchParams()
         reqBody.append('status', status)
