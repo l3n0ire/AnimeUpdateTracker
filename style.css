@@ -1,120 +1,218 @@
-body{
-    width:280px;
+body {
+    width: 280px;
     height: 340px;
-    margin:0;
-    padding:0;
+    margin: 0;
+    padding: 0;
 }
-.container{
-    padding:3vw;
+
+.container {
+    padding: 3vw;
 }
-h1,h2{
+
+h1,
+h2 {
     margin: 0;
 }
-.header{
+
+.header {
     background-color: #000;
-    padding:2vw;
-    overflow:hidden
+    padding: 2vw;
+    overflow: hidden
 }
-.logo{
-    color:white
+
+.logo {
+    color: white
 }
-.update{
-    color:#47baf2;
+
+.update {
+    color: #47baf2;
 }
-.watching, .lastWatchedContainer{
+
+.watching,
+.lastWatchedContainer {
     border: 1px solid #d3d3d3;
-    background-color:#fff;
+    background-color: #fff;
     margin-bottom: 2vh;
     padding: 2vw;
     box-shadow: 1px 1px 7px#d8d8d8;
 }
-button{
-    background-color:#467caf ;
-    color:#fff;
-    border:none;
-    height:10vw;
+
+button {
+    background-color: #467caf;
+    color: #fff;
+    border: none;
+    height: 10vw;
     padding: 2vw 2.2vw;
     border-radius: 4px;
     margin: 1vw 0.2vw;
 }
-#track{
-    width:35vw;
+
+#track {
+    width: 35vw;
 }
-.headerButtons{
-    
-    float:right;
+
+.headerButtons {
+    float: right;
 }
-.headerButtons button{
+
+.headerButtons button {
     margin: 1vw;
     font-size: 1em;
     line-height: 1em;
     background-color: #000;
 }
-#version{
-    float:left;
+
+#version {
+    float: left;
 }
-#copyright{
+
+#copyright {
     text-align: right;
     margin-top: 3vh;
 }
-.helpText{
-    margin:1vh 0;
-    display:none;
+
+.helpText {
+    margin: 1vh 0;
+    display: none;
 }
-#time, #totalTime, #lastWatchedTime, #lastWatchedTotalTime, .slash{
+
+#time,
+#totalTime,
+#lastWatchedTime,
+#lastWatchedTotalTime,
+.slash {
     display: inline-block;
 }
+
 p {
     margin: 1vh 0;
 }
-#imageContainer{
-    float:left;
-    margin-right:3vw;
+
+#imageContainer {
+    float: left;
+    width: 34vw;
+    margin-right: 3vw;
     height: 11em;
     margin-bottom: 1vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
-#artwork{
-    width:30vw;
-    height: 11em;
+
+#artwork {
+    width: 100%;
+    height: 100%;
 }
-#lastWatchedSide h3{
-    margin-top:0;
-    margin-bottom:5px;
+
+#lastWatchedSide h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
 }
-#lastWatchedSide{
+
+#lastWatchedSide {
     height: 11em;
     margin-bottom: 1vh;
-}
-#title{
-    margin:1vh 0;
-}
-.sectionLabel{
-    margin:2vh 0;
+    width: 52vw;
+    float: right;
 }
 
-#nextEpisode{
-    display:none;
+#title {
+    margin: 1vh 0;
 }
 
-.darkmode .watching, .darkmode .lastWatchedContainer{
+.sectionLabel {
+    margin: 2vh 0;
+}
+
+#nextEpisode {
+    display: none;
+}
+
+
+/* Loading animations */
+
+.circleLoader {
+    display: none;
+    border: 3px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 3px solid#3498db;
+    width: 12px;
+    height: 12px;
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.rect {
+    height: 3vh;
+    width: 0;
+    border-right: 53vw solid #fff;
+    border-radius: 0;
+    margin-bottom: 3vh;
+    position: relative;
+    left: -1px;
+  }
+.preloadTextAnimation{
+    display: none;
+    
+    background: linear-gradient(to right, #eeeeee 8%, #e1e1e1 18%, #eeeeee 33%);
+    background-size: 200% 50px;
+    animation: preloadAnimation 2s infinite;
+      
+}
+
+
+  
+  @keyframes preloadAnimation {
+    from {
+      background-position: -40vw 0;
+    }
+    to {
+      background-position: 40vw 0;
+    }
+  }
+
+/** Dark Mode */
+
+.darkmode .watching,
+.darkmode .lastWatchedContainer {
     border: 1px solid #30363d;
-    background-color:#000;
+    background-color: #000;
     box-shadow: none;
-    color:#fff;
+    color: #fff;
 }
-.darkmode button{
-    /*#467caf*/
-    background-color:#21262d ;
-    color:#fff;
-    border: 1px solid #30363d; 
+
+.darkmode button {
+    background-color: #21262d;
+    color: #fff;
+    border: 1px solid #30363d;
     margin: 1vw 0vw;
+}
 
+.darkmode a:visited,
+.darkmode a {
+    color: #fff;
 }
-.darkmode a:visited, .darkmode a{
-    color:#fff;
-}
-.darkmode.container{
-    background-color:#0D1117;
-    color:#fff;
 
+.darkmode.container {
+    background-color: #0D1117;
+    color: #fff;
 }
+
+.darkmode .circleLoader{
+    border-top: 3px solid#555;
+}
+.darkmode .preloadTextAnimation{
+    background: linear-gradient(to right, #1a1a1b 8%, #333 18%, #1a1a1b 33%);
+}
+.darkmode .rect{
+    border-right: 53vw solid #000;
+}
+

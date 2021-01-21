@@ -2,59 +2,69 @@
 <html>
 
 <head>
-  <title>Anime Update Tracker</title>
-  <link href="style.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
-    integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
+    <title>Anime Update Tracker</title>
+    <link href="style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css" integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
 </head>
 
 <body>
-  <div class="header">
-    <h1 class="logo">
-      Anime <span class="update">Update</span> Tracker
-    </h1>
-    <h1 class="logo" id ="version">(0.9.3)</h1>
-    <div class="headerButtons">
-      <button id="MAL">Login</button>
-      <button id="help">Help</button>
-      <button id="darkMode"><i class="fas fa-moon"></i></button>
-    </div>
-  </div>
-  <div class="container">
-    <p class="helpText">Click "Start Tracking" to track an episode</p>
-    <p class="helpText">"&larr;" and "&rarr;" to cycle through tracked anime</p>
-    <p class="helpText">Click "Login" then "Allow" when prompted to enable MAL synchronization</p>
-    <p class="helpText"> Click <a href="https://github.com/l3n0ire/AnimeUpdateTracker#anime-update-tracker" target="_blank">Here</a> for more help</p>
-
-    
-
-    <h3 class="sectionLabel">Last Watched</h3>
-    <p id ="malUpdateStatus"></p>
-    <div class="lastWatchedContainer">
-      <div id="imageContainer">
-        <img src="" id="artwork" />
-      </div>
-      <div id="lastWatchedSide">
-        <h3 id="lastWatched">No anime in Last Watched</h3>
-        <p id="lastWatchedEpisode">Episode</p>
-        <p id="lastWatchedSite"> Site</p>
-        <p id="schedule"> Days at 00:00 </p>
-        <div class="timeGroup">
-          <p id="lastWatchedTime">00:00</p>
-          <p class="slash">/</p>
-          <p id="lastWatchedTotalTime">00:00</p>
+    <div class="header">
+        <h1 class="logo">
+            Anime <span class="update">Update</span> Tracker
+        </h1>
+        <h1 class="logo" id="version">(0.9.3)</h1>
+        <div class="headerButtons">
+            <button id="MAL">Login</button>
+            <button id="help">Help</button>
+            <button id="darkMode"><i class="fas fa-moon"></i></button>
         </div>
-      </div>
-      <button id="previous"><i class="fas fa-arrow-left"></i></button>
-      <button id="next"><i class="fas fa-arrow-right"></i></button>
-      <button id="resume">Resume</button>
-      <button id="nextEpisode">Next episode</button>
-      <button id="delete"><i class="fas fa-trash-alt"></i></button>
     </div>
-    <button id="track">Start Tracking</button>
-    <p style="display:inline; float:right;" id="copyright">&#169; 2020 Colin Lin</p>
-  </div>
-  <script src="popup.js"></script>
+    <div class="container">
+        <p class="helpText">Click "Start Tracking" to track an episode</p>
+        <p class="helpText">"&larr;" and "&rarr;" to cycle through tracked anime</p>
+        <p class="helpText">Click "Login" then "Allow" when prompted to enable MAL synchronization</p>
+        <p class="helpText"> Click <a href="https://github.com/l3n0ire/AnimeUpdateTracker#anime-update-tracker" target="_blank">Here</a> for more help</p>
+
+
+
+        <h3 class="sectionLabel">Last Watched</h3>
+        <p id="malUpdateStatus"></p>
+        <div class="lastWatchedContainer">
+            <div id="imageContainer">
+                <div  class='circleLoader'></div>
+                <img src="" id="artwork" />
+            </div>
+            <div id="lastWatchedSide">
+                <div class="preloadTextAnimation">
+                    <div class='rect'></div>
+                    <div class='rect'></div>
+                    <div class='rect'></div>
+                    <div class='rect'></div>
+                    <div class='rect'></div>
+                    <div class='rect'></div>
+                </div>
+                <div id="lastWatchedContent">
+                    <h3 id="lastWatched">No anime in Last Watched</h3>
+                    <p id="lastWatchedEpisode">Episode</p>
+                    <p id="lastWatchedSite"> Site</p>
+                    <p id="schedule"> Days at 00:00 </p>
+                    <div class="timeGroup">
+                        <p id="lastWatchedTime">00:00</p>
+                        <p class="slash">/</p>
+                        <p id="lastWatchedTotalTime">00:00</p>
+                    </div>
+                </div>
+            </div>
+            <button id="previous"><i class="fas fa-arrow-left"></i></button>
+            <button id="next"><i class="fas fa-arrow-right"></i></button>
+            <button id="resume">Resume</button>
+            <button id="nextEpisode">Next episode</button>
+            <button id="delete"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        <button id="track">Start Tracking</button>
+        <p style="display:inline; float:right;" id="copyright">&#169; 2020 Colin Lin</p>
+    </div>
+    <script src="popup.js"></script>
 </body>
 
 </html>

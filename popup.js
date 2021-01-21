@@ -4,6 +4,8 @@ var index
 var showHelp = false
 var isBrowsing = false
 var isDarkModeOn = false;
+var isLoading = false;
+var isTracking =false;
 var currWatching = ''
 var broadcastTimes = {}
 var artwork = {}
@@ -50,6 +52,28 @@ async function getDataFromStorage() {
 
 getDataFromStorage()
 
+function toggleLoadingAnimation(){
+  isLoading =! isLoading;
+  if(isLoading)
+  {
+    // clear image and lastWatchedSide
+    document.querySelector('#artwork').style.display = "none";
+    document.querySelector('#lastWatchedContent').style.display = "none";
+    document.querySelector(".circleLoader").style.display = "block";
+    document.querySelector(".preloadTextAnimation").style.display="block"
+
+  }
+  else{
+    // hide loading animation and show image + lastWatchedSide
+    document.querySelector(".circleLoader").style.display = "none";
+    document.querySelector(".preloadTextAnimation").style.display="none"
+    document.querySelector('#artwork').style.display = "block";
+    document.querySelector('#lastWatchedContent').style.display = "block";
+  }
+
+
+}
+
 /**
  * Updates or creates the broadcastTimes object by fetching from API
  * Invokes updateDOM() to update "Last Watched" DOM
@@ -63,6 +87,10 @@ async function updateBroadcastTimes(isDelete = false) {
     location.reload()
   }
   if (lastWatched.length > 0) {
+    // set loading animation
+    if(!isTracking)
+      toggleLoadingAnimation()
+
     let queryName = lastWatched[index]
     // replace spaces with %20
     queryName.replace(" ", "%20")
@@ -136,6 +164,8 @@ function convertJST(timeStr) {
  */
 function updateDOM() {
   if (lastWatched.length > 0) {
+    toggleLoadingAnimation();
+
     // for currently airing update broadcast time
     if (lastWatched[index] in broadcastTimes)
       scheduleElement.innerHTML = broadcastTimes[lastWatched[index]]
@@ -154,6 +184,7 @@ function updateDOM() {
     else{
       document.getElementById('nextEpisode').style.display = "none"
     }
+    
   }
   else {
     // display help text if user is not tracking anything
@@ -184,6 +215,8 @@ document.getElementById("track").addEventListener('click', async function () {
     function (response) {
       let action = response.action;
       document.getElementById("track").innerHTML = action
+      toggleLoadingAnimation();
+      isTracking =true;
     });
 
 })
