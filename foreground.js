@@ -14,7 +14,7 @@ if (url.indexOf('anime-update') >= 0) {
     title = fullName.substring(0, fullName.indexOf('Episode') - 1)
   }
 
-  console.log("Anime update tracker active")
+  //console.log("Anime update tracker active")
 
   let baseURL = 'https://anime-update.com/watch-online/'
 
@@ -48,7 +48,7 @@ else if (url.indexOf('4anime') >= 0) {
   var title = document.querySelector(".singletitletop a").innerHTML
   var episode = document.querySelectorAll('#titleleft')[1].innerHTML
 
-  console.log("4anime tracker active")
+  //console.log("4anime tracker active")
 
   // two next and previous buttons for mobile/desktop
   let nextButtons = document.querySelectorAll('.anipager-next a')
@@ -83,7 +83,7 @@ function remover(arr, value) {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i] === value) {
       arr.splice(i, 1)
-      console.log("removed")
+      //console.log("removed")
     }
   }
   return arr
@@ -147,7 +147,7 @@ setInterval(async function () {
   // get time from video players
   if (site == 'Anime Update') {
     let videoPlayer = document.querySelector(".nav.nav-tabs.hometab .active a").innerHTML
-    console.log("time " + videoPlayer)
+    //console.log("time " + videoPlayer)
     videoElement = 'video'
     // sets time and totalTime from video player data 
     setTime(videoPlayer)
@@ -174,7 +174,7 @@ setInterval(async function () {
   // store current episode in storage
   toStore = { "episode": episode, "time": time, "totalTime": totalTime, "url": url, "site": site, "nextEpisodeLink":nextEpisodeLink }
   chrome.storage.sync.set({ [title]: toStore }, function () {
-    console.log('added ' + title + " " + episode + " " + time + "/" + totalTime)
+    //console.log('added ' + title + " " + episode + " " + time + "/" + totalTime)
   });
   
   // update last watched
@@ -190,7 +190,7 @@ setInterval(async function () {
       toStoreLW = result['lastWatched']
     }
     chrome.storage.sync.set({ ['lastWatched']: toStoreLW }, function () {
-      console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
+      //console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
       // connect to port info
       let port = chrome.runtime.connect({ name: "info" });
 
