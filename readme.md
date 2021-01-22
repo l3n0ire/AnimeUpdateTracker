@@ -20,19 +20,27 @@ For developers
 1. Pin this extension so you can click on it.
 2. Navigate to an episode on either https://anime-update.com/ or https://4anime.to/.
 3. Click "Start Tracking" to track that episode
-4. Wait 2 sec and the episode you are tracking will appear in the "Currently Watching" section
+4. Wait 5 sec and "Currently Watching" should appear. That means tracking was successful.
 
 #### MAL
-1. Click login button to sign into MAL
+1. Click "Login" to sign into MAL
 2. A new tab will open asking you for access. Click "Allow"
 3. Now all the anime you track will automatically update your MAL
+4. Click "Logout" to stop MAL sync
+
+#### Dark Mode
+- Click the moon to toggle dark mode on or off
 
 #### Last watched
 - The most recently watched episode will appear in the "Last Watched" section
-- Use "Previous" and "Next" buttons to cycle through the anime you have tracked
+- Use "<-" and "->" buttons to cycle through the anime you have tracked
 - "Resume" will open that episode in a new tab and will set the video to where you last left off. For 4anime.to, click play for this to take affect.
 - "Next episode" will open the next episode in a new tab. Note this is availible when the next episode is availible on the site at the time of watching. It will not appear when a new episode is uploaded (This may be added in the future).
 - "Delete" will remove that episode from "Last Watched" and it will no longer appear when cycling through the anime you have tracked
+
+#### Auto Tracking
+- When you start watching an episode of an anime you have tracked, the extension will automatically start tracking your progress. No need to click "Start tracking" everytime.
+- Note: This only works on 4anime.to. More sites will be supported in the future.
 
 ## Issues
 - Only the "video" video player on Anime Update is supported. Support for other video players is not possible at this time
