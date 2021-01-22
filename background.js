@@ -75,7 +75,7 @@ async function getSecrets(){
 chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
     // if nextEpisode is true then user navigated to next episode
     // start tracking
-    console.log(change.url)
+    console.log(tab.url)
     
     if(tab.active && change.url && change.url.indexOf("http://localhost/oauth")>=0){
         userAuthCode = change.url.substring(change.url.indexOf("code=")+5)
@@ -87,8 +87,8 @@ chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
             getUserAccessToken()
         })    
     }
-    else if (tab.active && change.url ) {
-        handleInjection(change.url);
+    else if (tab.active && tab.url ) {
+        handleInjection(tab.url);
         //nextEpisode = false
     }
 });
