@@ -75,21 +75,21 @@ async function getSecrets(){
 chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
     // if nextEpisode is true then user navigated to next episode
     // start tracking
-    if (tab.active && change.url ) {
-        handleInjection(change.url);
-        //nextEpisode = false
-    }
-    else if(tab.active && change.url && change.url.indexOf("http://localhost/oauth")>=0){
+    console.log(tab.url)
+    
+    if(tab.active && change.url && change.url.indexOf("http://localhost/oauth")>=0){
         userAuthCode = change.url.substring(change.url.indexOf("code=")+5)
         // store user auth code
         chrome.storage.sync.set({'userAuthCode':userAuthCode}, function(){
-            //console.log("saved userAuthCode")
+            console.log("saved userAuthCode")
             // close the tab
             chrome.tabs.remove(tab.id)
             getUserAccessToken()
-        })
-
-        
+        })    
+    }
+    else if (tab.active && tab.url ) {
+        handleInjection(tab.url);
+        //nextEpisode = false
     }
 });
 
