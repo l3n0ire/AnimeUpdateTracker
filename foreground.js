@@ -140,6 +140,14 @@ var isMALUpdated = false
 var isMALComplete = false
 var malUpdateStatus =""
 
+function formatTime(s){
+  let m = Math.floor(s/ 60);
+  m = (m >= 10) ? m : "0" + m;
+  s = Math.floor(s % 60);
+  s = (s >= 10) ? s : "0" + s;
+  return m + ":" + s;
+}
+
 setInterval(async function () {
   let videoElement=""
   
@@ -148,20 +156,18 @@ setInterval(async function () {
   if (site == 'Anime Update') {
     let videoPlayer = document.querySelector(".nav.nav-tabs.hometab .active a").innerHTML
     //console.log("time " + videoPlayer)
-    videoElement = 'video'
+    videoElement = document.querySelector('video')
     // sets time and totalTime from video player data 
     setTime(videoPlayer)
 
   }
   else if (site == '4anime') {
-    time = document.querySelector('.vjs-current-time-display').innerHTML
-    time = time.substring(time.lastIndexOf('>') + 1)
-    totalTime = document.querySelector('.vjs-duration-display').innerHTML
-    totalTime = totalTime.substring(totalTime.lastIndexOf(' ') + 1)
-    videoElement = '#example_video_1_html5_api'
+    // set video element
+    videoElement = document.querySelector('#example_video_1_html5_api')
+    time = formatTime(videoElement.currentTime);
+    totalTime = formatTime(videoElement.duration);
+    
   }
-  // set video element
-  videoElement = document.querySelector(videoElement)
   // calculate progress
   // -1 means duration is 0
   let progress = videoElement.duration != 0 ? videoElement.currentTime / videoElement.duration : -1
@@ -173,12 +179,12 @@ setInterval(async function () {
 
   // store current episode in storage
   toStore = { "episode": episode, "time": time, "totalTime": totalTime, "url": url, "site": site, "nextEpisodeLink":nextEpisodeLink }
-  chrome.storage.sync.set({ [title]: toStore }, function () {
+  chrome.storage.local.set({ [title]: toStore }, function () {
     //console.log('added ' + title + " " + episode + " " + time + "/" + totalTime)
   });
   
   // update last watched
-  chrome.storage.sync.get(['lastWatched'], function (result) {
+  chrome.storage.local.get(['lastWatched'], function (result) {
     if (result['lastWatched'] == undefined) {
       toStoreLW.push(title)
     }
@@ -189,8 +195,8 @@ setInterval(async function () {
       result['lastWatched'].push(title)
       toStoreLW = result['lastWatched']
     }
-    chrome.storage.sync.set({ ['lastWatched']: toStoreLW }, function () {
-      //console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
+    chrome.storage.local.set({ ['lastWatched']: toStoreLW }, function () {
+      console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
       // connect to port info
       let port = chrome.runtime.connect({ name: "info" });
 
@@ -200,7 +206,7 @@ setInterval(async function () {
     });
   });
   // check if user is logged in
-  chrome.storage.sync.get(['userAuthCode'], function (result) {
+  chrome.storage.local.get(['userAuthCode'], function (result) {
     if(result['userAuthCode']!=undefined){
       // each injection can only update user's MAl once
       // each time a new episode is loaded a new foregroundjs is injected

@@ -12,10 +12,10 @@ var artwork = {}
 var malIDs = {}
 
 // popup alerts
-chrome.storage.sync.get(['seenUpdate'],function(result){
+chrome.storage.local.get(['seenUpdate'],function(result){
   if(!result['seenUpdate']){
-    confirm("MAL sync has been fixed. Please login again if you want to use it")
-    chrome.storage.sync.set({'seenUpdate':true})
+    confirm("4anime tracking issue has been fixed. Data will be synced with chrome every minute. Click the cloud button to manually sync")
+    chrome.storage.local.set({'seenUpdate':true})
   }
 
 })
@@ -34,11 +34,15 @@ var scheduleElement = document.getElementById("schedule")
 var artworkElement = document.getElementById("artwork")
 var helpText = document.getElementsByClassName("helpText")
 
+chrome.storage.sync.get(null, function (result) {
+  console.log(result)
+});
+
 /**
  * Gets lastWatched and episode data from storage
  */
 async function getDataFromStorage() {
-  await chrome.storage.sync.get(null, function (result) {
+  await chrome.storage.local.get(null, function (result) {
     if (result != {}) {
       allData = result
       if (result['lastWatched'] != undefined) {
@@ -164,6 +168,9 @@ function convertJST(timeStr) {
  */
 function updateDOM() {
   if (lastWatched.length > 0) {
+    if(isTracking){
+      isTracking=false;
+    }
     toggleLoadingAnimation();
 
     // for currently airing update broadcast time
@@ -228,14 +235,14 @@ document.getElementById("delete").addEventListener('click', async function () {
     let toDelete = confirm("Are you sure you want delete this anime from Last Watched?")
     if (toDelete) {
       // remove the current item from storage
-      chrome.storage.sync.remove([lastWatched[index]], function () {
+      chrome.storage.local.remove([lastWatched[index]], function () {
         //console.log("deleted from storage")
       });
       // remove the current item from lastWatched
       lastWatched.splice(index, 1)
-      //console.log(lastWatched)
+      console.log(lastWatched)
       // store updated lastWatched in storage
-      chrome.storage.sync.set({ ['lastWatched']: lastWatched }, function () {
+      chrome.storage.local.set({ ['lastWatched']: lastWatched }, function () {
         //console.log("deleted from lastWatched")
       });
       // set index to end of lastWatched array
@@ -263,7 +270,7 @@ document.getElementById("nextEpisode").addEventListener('click', () => {
 
 
 // Login button Text
-chrome.storage.sync.get(['userAuthCode'], function (result) {
+chrome.storage.local.get(['userAuthCode'], function (result) {
   //console.log(result['userAuthCode'])
   document.getElementById("MAL").innerHTML =  result['userAuthCode'] != undefined ? "Log Out": "Login"
   if(result['userAuthCode'] != undefined){
@@ -304,9 +311,9 @@ document.getElementById("help").addEventListener('click', function () {
 
 // check if isDarkModeOn exists
 // if not set it to false
-chrome.storage.sync.get(["isDarkModeOn"], function(result){
+chrome.storage.local.get(["isDarkModeOn"], function(result){
   if(result['isDarkModeOn'] == undefined){
-    chrome.storage.sync.set({"isDarkModeOn":false});
+    chrome.storage.local.set({"isDarkModeOn":false});
   }
   else{
     isDarkModeOn = result['isDarkModeOn']
@@ -319,7 +326,7 @@ chrome.storage.sync.get(["isDarkModeOn"], function(result){
 document.getElementById("darkMode").addEventListener('click', async function () {
   isDarkModeOn = ! isDarkModeOn
   toggleDarkMode();
-  chrome.storage.sync.set({"isDarkModeOn":isDarkModeOn});
+  chrome.storage.local.set({"isDarkModeOn":isDarkModeOn});
 });
 function toggleDarkMode(){
   if(isDarkModeOn)
@@ -328,6 +335,19 @@ function toggleDarkMode(){
     document.querySelector(".container").classList.remove("darkmode");
   }
 }
+
+// chrome storage sync (cloud)
+document.getElementById("cloud").addEventListener('click',async function(){
+  chrome.storage.local.get(null, function (result) {
+    if(result!={}){
+        chrome.storage.sync.set(result, function(res){
+          alert('Synced storage!')
+        })
+    }
+  });
+
+})
+
 // update "Currently Watching" DOM when message is received from foreground.js 
 chrome.runtime.onConnect.addListener(function (port) {
   console.assert(port.name == "info");
