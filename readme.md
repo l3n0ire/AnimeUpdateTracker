@@ -42,6 +42,10 @@ For developers
 - When you start watching an episode of an anime you have tracked, the extension will automatically start tracking your progress. No need to click "Start tracking" everytime.
 - Note: This only works on 4anime.to. More sites will be supported in the future.
 
+#### Storage Sync
+- Click the cloud icon to sync your extension data with chrome. Data syncs are automatically done every minute.
+- Data Sync allows the extension data to be shared accross all your chrome devices. So you can start tracking on one device and continue where you left off on another.
+
 ## Issues
 - Only the "video" video player on Anime Update is supported. Support for other video players is not possible at this time
 - Resume may not work for some episodes on Anime Update. Please report these by opening an issue and providing a link to the episode

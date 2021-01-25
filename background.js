@@ -9,18 +9,18 @@ var codeVerifier
 var addData
 var lastWatched
 
-chrome.storage.sync.get(['seenUpdate'], function(result){
+chrome.storage.local.get(['seenUpdate'], function(result){
     if(result['seenUpdate'] == undefined || result['seenUpdate'] == false ){
-        chrome.storage.sync.set({'seenUpdate':false}, function(){
+        chrome.storage.local.set({'seenUpdate':false}, function(){
             clearUserTokens();
         });
     }
 })
 
 function clearUserTokens(){
-    chrome.storage.sync.get(['userAuthCode','userAcessToken'], function(result){
+    chrome.storage.local.get(['userAuthCode','userAcessToken'], function(result){
         if(result['userAuthCode']!=undefined || result['userAccessToken']!=undefined){
-            chrome.storage.sync.remove(['userAuthCode','userAccessToken'], function(){
+            chrome.storage.local.remove(['userAuthCode','userAccessToken'], function(){
                 userAuthCode =undefined;
                 //console.log("cleared User Tokens")
             })
@@ -30,9 +30,8 @@ function clearUserTokens(){
     })
 }
 
-async function updateAddData (){
-    
-    await chrome.storage.sync.get(null, function (result) {
+async function updateLocalData(){
+    await chrome.storage.local.get(null, function (result) {
         if(result!={}){
             addData=result
             if(result.lastWatched!=undefined){
@@ -41,11 +40,46 @@ async function updateAddData (){
         }
     });
 }
+
+async function updateAddData (){
+    // replace local data with sync data
+    await chrome.storage.sync.get(null, async function (result) {
+        if(result!={}){
+            addData=result
+            if(result.lastWatched!=undefined){
+                lastWatched=result.lastWatched;
+            }
+            await chrome.storage.local.set(result, function(res1){
+                chrome.storage.sync.get(null, function (res2) {
+                    //console.log(res2);
+                });
+            });
+        }
+        else{
+            await updateLocalData();
+        }
+    });
+    
+    
+}
 updateAddData ();
 
+async function syncWithChrome(){
+    chrome.storage.local.get(null, async function (result){
+        chrome.storage.sync.set(result, async function(res){
+            console.log("synced data at "+ new Date());
+
+        })
+    })
+}
+// sync data every minute
+syncWithChrome();
+setInterval(syncWithChrome, 1*1*60*1000);
+
 async function handleInjection(url){
-    await updateAddData();
+    await updateLocalData();
     for(let i=0;i<lastWatched.length;i++){
+        console.log(addData);
         let trackedUrl = addData[lastWatched[i]].url;
         if(url == trackedUrl || url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('episode')+7)) >=0){
             setTimeout(injector,1000,'./foreground.js');
@@ -80,7 +114,7 @@ chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
     if(tab.active && change.url && change.url.indexOf("http://localhost/oauth")>=0){
         userAuthCode = change.url.substring(change.url.indexOf("code=")+5)
         // store user auth code
-        chrome.storage.sync.set({'userAuthCode':userAuthCode}, function(){
+        chrome.storage.local.set({'userAuthCode':userAuthCode}, function(){
             console.log("saved userAuthCode")
             // close the tab
             chrome.tabs.remove(tab.id)
@@ -130,7 +164,7 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         response = 'tracking'
     }
     else if (action === 'resume') {
-        chrome.storage.sync.get(null, function (result) {
+        chrome.storage.local.get(null, function (result) {
             let url = result[request.title].url
             let timeText = result[request.title].time
 
@@ -200,15 +234,15 @@ async function promptMALLogOut(){
     codeVerifier = undefined
     userAccessToken = undefined
     userAuthCode = undefined
-    chrome.storage.sync.set({'userAuthCode':null}, function(){
+    chrome.storage.local.set({'userAuthCode':null}, function(){
         //console.log("logged out")
-        chrome.storage.sync.get(['userAuthCode'], function (result) {
+        chrome.storage.local.get(['userAuthCode'], function (result) {
             //console.log(result['userAuthCode'])
         })
     })
 }
 async function getUserAuthCode(){
-    chrome.storage.sync.get(['userAuthCode'], async function (result) {
+    chrome.storage.local.get(['userAuthCode'], async function (result) {
         userAuthCode = result['userAuthCode']
         getUserAccessToken()
     });
@@ -219,7 +253,7 @@ async function getUserAccessToken(){
     // check if userAuthCode Exists
     // check if userAccessToken Exists
     if (userAccessToken == undefined){
-        chrome.storage.sync.get(['userAccessToken'], async function (result) {
+        chrome.storage.local.get(['userAccessToken'], async function (result) {
             //console.log(result)
             if(result['userAccessToken'] == undefined || result['userAccessToken'] == {}){
                 let url ="https://myanimelist.net/v1/oauth2/token"
@@ -239,7 +273,7 @@ async function getUserAccessToken(){
                 })
                 let data = await res.json()
                 userAccessToken = data
-                chrome.storage.sync.set({'userAccessToken':data}, function(){
+                chrome.storage.local.set({'userAccessToken':data}, function(){
                     /*console.log(CLIENT_ID+" "+userAuthCode+"\n"+codeVerifier)
                     console.log(data)
                     console.log("saved userAccessToken")*/
@@ -256,7 +290,7 @@ async function getUserAccessToken(){
     
 }
 async function refreshToken (){
-    chrome.storage.sync.get(['userAccessToken'], async function (result) {
+    chrome.storage.local.get(['userAccessToken'], async function (result) {
         if(result['userAccessToken']!= undefined){
             let params = new URLSearchParams()
             //console.log(CLIENT_ID)
@@ -278,7 +312,7 @@ async function refreshToken (){
             if(res.status == 200){
                 userAccessToken = data
                 
-                chrome.storage.sync.set({'userAccessToken':data}, function(){
+                chrome.storage.local.set({'userAccessToken':data}, function(){
                    // console.log("refreshed userAccessToken")
                     setTimeout(refreshToken,10 * 24 * 60 * 1000)
                 })
