@@ -40,7 +40,7 @@ async function updateLocalData(){
         }
     });
 }
-
+/*
 async function updateAddData (){
     // replace local data with sync data
     await chrome.storage.sync.get(null, async function (result) {
@@ -62,8 +62,10 @@ async function updateAddData (){
     
     
 }
-updateAddData ();
 
+updateAddData ();
+*/
+/*
 async function syncWithChrome(){
     chrome.storage.local.get(null, async function (result){
         chrome.storage.sync.set(result, async function(res){
@@ -75,7 +77,7 @@ async function syncWithChrome(){
 // sync data every minute
 syncWithChrome();
 setInterval(syncWithChrome, 1*1*60*1000);
-
+*/
 async function handleInjection(url){
     await updateLocalData();
     for(let i=0;i<lastWatched.length;i++){
@@ -121,9 +123,12 @@ chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
             getUserAccessToken()
         })    
     }
+    else if(tab.active && tab.url && nextEpisode){
+        setTimeout(injector,1000,'./foreground.js');
+        nextEpisode = false;
+    }
     else if (tab.active && tab.url ) {
         handleInjection(tab.url);
-        //nextEpisode = false
     }
 });
 
@@ -188,7 +193,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
                 // set video to where user last left off
                 setTimeout(function () { chrome.tabs.executeScript(null, { code: `document.querySelector('${videoElement}').currentTime=${time}` }) }, delay)
                 // start tracking the current episode
-                //setTimeout(function () { injector('./foreground.js') }, delay)
+                if (url.indexOf('anime-update') >= 0) {
+                    console.log('got here')
+                    setTimeout(function () { injector('./foreground.js') }, delay)
+                }
             })
         });
 

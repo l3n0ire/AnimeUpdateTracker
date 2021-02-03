@@ -14,7 +14,7 @@ var malIDs = {}
 // popup alerts
 chrome.storage.local.get(['seenUpdate'],function(result){
   if(!result['seenUpdate']){
-    confirm("4anime tracking issue has been fixed. Data will be synced with chrome every minute. Click the cloud button to manually sync")
+    confirm("If AnimeUpdate tracker is not working properly, delete and redownload it. Cloud has been disabled. Working on fix")
     chrome.storage.local.set({'seenUpdate':true})
   }
 
@@ -33,11 +33,11 @@ days['Sundays'] = new Date(2020, 10, 15, 0, 0, 0, 0)
 var scheduleElement = document.getElementById("schedule")
 var artworkElement = document.getElementById("artwork")
 var helpText = document.getElementsByClassName("helpText")
-
+/*
 chrome.storage.sync.get(null, function (result) {
   console.log(result)
 });
-
+*/
 /**
  * Gets lastWatched and episode data from storage
  */
@@ -96,11 +96,11 @@ async function updateBroadcastTimes(isDelete = false) {
       toggleLoadingAnimation()
 
     let queryName = lastWatched[index]
-    // replace spaces with %20
-    queryName.replace(" ", "%20")
+    // remove spaces
+    queryName.replace(" ", "")
 
     // Get malId and artwork for anime by searching by name
-    // limit results to 1
+    // limit results to 5
     let res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit1`)
     let data = await res.json()
 
@@ -336,7 +336,7 @@ function toggleDarkMode(){
   }
 }
 
-// chrome storage sync (cloud)
+/* chrome storage sync (cloud)
 document.getElementById("cloud").addEventListener('click',async function(){
   chrome.storage.local.get(null, function (result) {
     if(result!={}){
@@ -346,7 +346,7 @@ document.getElementById("cloud").addEventListener('click',async function(){
     }
   });
 
-})
+})*/
 
 // update "Currently Watching" DOM when message is received from foreground.js 
 chrome.runtime.onConnect.addListener(function (port) {
