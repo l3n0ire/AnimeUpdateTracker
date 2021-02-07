@@ -81,7 +81,7 @@ setInterval(syncWithChrome, 1*1*60*1000);
 async function handleInjection(url){
     await updateLocalData();
     for(let i=0;i<lastWatched.length;i++){
-        console.log(addData);
+        //console.log(addData);
         let trackedUrl = addData[lastWatched[i]].url;
         if(url == trackedUrl || url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('episode')+7)) >=0){
             setTimeout(injector,1000,'./foreground.js');
@@ -332,27 +332,29 @@ async function refreshToken (){
 
 }
 
+function mostSimilar(data,title){
+    let firstDiff = Math.sqrt(Math.pow(data.results[0].title.length - title.length,2));
+    let secondDiff = Math.sqrt(Math.pow(data.results[1].title.length - title.length,2));
+    // return the title with the smallest length difference
+    return secondDiff<firstDiff? 1: 0;
+}
+
 async function updateMAL(title,episode,isComplete){
     //console.log('updateMal ran')
     // update user's MAL
       if(userAccessToken != undefined && userAuthCode != undefined ){
         let access_token = userAccessToken['access_token']
         let queryName = title
-        queryName.replace(" ", "%20")
+        queryName = queryName.replaceAll(" ", "")
 
         // get info about anime like id and numEpisodes
-        let searchURL = `https://api.myanimelist.net/v2/anime?q=${queryName}&limit=1&fields=id,title,num_episodes`
-        
-        let res = await fetch(searchURL,{
-          headers: {
-              'Authorization':`Bearer ${access_token}`,
-          },
-        })
-
-
+        let searchURL = `https://api.jikan.moe/v3/search/anime?q=${queryName}&limit=2`
+        let res = await fetch(searchURL)
         let data = await res.json()
-        let id = await data.data[0].node.id
-        let numEpisodes = await data.data[0].node['num_episodes']
+        let malResults = data.results[mostSimilar(data,title)];
+        console.log(queryName)
+        let id = await malResults.mal_id
+        let numEpisodes = await malResults.episodes
         let malListURL = await `https://api.myanimelist.net/v2/anime/${id}/my_list_status`
 
         // convert episode string to int

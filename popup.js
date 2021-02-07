@@ -14,7 +14,7 @@ var malIDs = {}
 // popup alerts
 chrome.storage.local.get(['seenUpdate'],function(result){
   if(!result['seenUpdate']){
-    confirm("If AnimeUpdate tracker is not working properly, delete and redownload it. Cloud has been disabled. Working on fix")
+    confirm("Improved MAL sync and Artwork accuracy")
     chrome.storage.local.set({'seenUpdate':true})
   }
 
@@ -78,6 +78,13 @@ function toggleLoadingAnimation(){
 
 }
 
+function mostSimilar(data,title){
+  let firstDiff = Math.sqrt(Math.pow(data.results[0].title.length - title.length,2));
+  let secondDiff = Math.sqrt(Math.pow(data.results[1].title.length - title.length,2));
+  // return the title with the smallest length difference
+  return secondDiff<firstDiff? 1: 0;
+}
+
 /**
  * Updates or creates the broadcastTimes object by fetching from API
  * Invokes updateDOM() to update "Last Watched" DOM
@@ -97,15 +104,15 @@ async function updateBroadcastTimes(isDelete = false) {
 
     let queryName = lastWatched[index]
     // remove spaces
-    queryName.replace(" ", "")
+    queryName = queryName.replaceAll(" ", "")
 
     // Get malId and artwork for anime by searching by name
     // limit results to 5
-    let res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit1`)
+    let res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit=2`)
     let data = await res.json()
 
     // should only be one result
-    let resultObj = data.results[0]
+    let resultObj = data.results[mostSimilar(data,lastWatched[index])];
     // store malid
     malIDs[lastWatched[index]] = resultObj.mal_id
     // store image url 
