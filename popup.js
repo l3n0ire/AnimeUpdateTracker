@@ -14,7 +14,7 @@ var malIDs = {}
 // popup alerts
 chrome.storage.local.get(['seenUpdate'],function(result){
   if(!result['seenUpdate']){
-    confirm("4anime tracking issue has been fixed. Data will be synced with chrome every minute. Click the cloud button to manually sync")
+    confirm("Improved MAL sync and Artwork accuracy")
     chrome.storage.local.set({'seenUpdate':true})
   }
 
@@ -33,11 +33,11 @@ days['Sundays'] = new Date(2020, 10, 15, 0, 0, 0, 0)
 var scheduleElement = document.getElementById("schedule")
 var artworkElement = document.getElementById("artwork")
 var helpText = document.getElementsByClassName("helpText")
-
+/*
 chrome.storage.sync.get(null, function (result) {
   console.log(result)
 });
-
+*/
 /**
  * Gets lastWatched and episode data from storage
  */
@@ -78,6 +78,13 @@ function toggleLoadingAnimation(){
 
 }
 
+function mostSimilar(data,title){
+  let firstDiff = Math.sqrt(Math.pow(data.results[0].title.length - title.length,2));
+  let secondDiff = Math.sqrt(Math.pow(data.results[1].title.length - title.length,2));
+  // return the title with the smallest length difference
+  return secondDiff<firstDiff? 1: 0;
+}
+
 /**
  * Updates or creates the broadcastTimes object by fetching from API
  * Invokes updateDOM() to update "Last Watched" DOM
@@ -96,16 +103,16 @@ async function updateBroadcastTimes(isDelete = false) {
       toggleLoadingAnimation()
 
     let queryName = lastWatched[index]
-    // replace spaces with %20
-    queryName.replace(" ", "%20")
+    // remove spaces
+    queryName = queryName.replaceAll(" ", "")
 
     // Get malId and artwork for anime by searching by name
-    // limit results to 1
-    let res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit1`)
+    // limit results to 5
+    let res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${queryName}&limit=2`)
     let data = await res.json()
 
     // should only be one result
-    let resultObj = data.results[0]
+    let resultObj = data.results[mostSimilar(data,lastWatched[index])];
     // store malid
     malIDs[lastWatched[index]] = resultObj.mal_id
     // store image url 
@@ -336,7 +343,7 @@ function toggleDarkMode(){
   }
 }
 
-// chrome storage sync (cloud)
+/* chrome storage sync (cloud)
 document.getElementById("cloud").addEventListener('click',async function(){
   chrome.storage.local.get(null, function (result) {
     if(result!={}){
@@ -346,7 +353,7 @@ document.getElementById("cloud").addEventListener('click',async function(){
     }
   });
 
-})
+})*/
 
 // update "Currently Watching" DOM when message is received from foreground.js 
 chrome.runtime.onConnect.addListener(function (port) {

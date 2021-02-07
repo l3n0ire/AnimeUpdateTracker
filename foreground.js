@@ -7,10 +7,12 @@ if (url.indexOf('anime-update') >= 0) {
   let fullName = document.getElementsByClassName("page_title")[1].innerHTML
   // Values for OVAs and Movies
   var episode = ""
+  var episodeNum=""
   var title = fullName
   // Values for an episode of a series
   if (fullName.indexOf('Episode') >= 0) {
     episode = fullName.substring(fullName.indexOf('Episode'), fullName.length)
+    episodeNum = fullName.substring(fullName.indexOf('Episode ')+8, fullName.length)
     title = fullName.substring(0, fullName.indexOf('Episode') - 1)
   }
 
@@ -128,6 +130,14 @@ function getNextEpisodeLink(){
     let linkButtons = document.querySelectorAll('.btn-group a')
     // the next episode button is the third one
     nextEpisodeLink = linkButtons.length == 3? linkButtons[2].href : ""
+    if(linkButtons.length>1){
+      for(let i=0;i<linkButtons.length;i++){
+        if(linkButtons[i].href.indexOf("https://anime-update.com/watch-online/")>=0){
+          url = linkButtons[i].href.substring(0,linkButtons[i].href.lastIndexOf('-')+1) + episodeNum;
+          break;
+        }
+      }
+    }
   }
   else if(site == '4anime'){
     if(document.querySelector('.anipager-next a') != undefined)
@@ -185,26 +195,30 @@ setInterval(async function () {
   
   // update last watched
   chrome.storage.local.get(['lastWatched'], function (result) {
-    if (result['lastWatched'] == undefined) {
-      toStoreLW.push(title)
-    }
-    else {
-      // remove existing series entry
-      remover(result['lastWatched'], title)
-      // insert new series to end of array
-      result['lastWatched'].push(title)
-      toStoreLW = result['lastWatched']
-    }
-    chrome.storage.local.set({ ['lastWatched']: toStoreLW }, function () {
-      console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
-      // connect to port info
-      let port = chrome.runtime.connect({ name: "info" });
+    if(title){
+      if (result['lastWatched'] == undefined) {
+        toStoreLW.push(title)
+      }
+      else {
+        // remove existing series entry
+        remover(result['lastWatched'], title)
+        // insert new series to end of array
+        result['lastWatched'].push(title)
+        toStoreLW = result['lastWatched']
+      }
+    
+      chrome.storage.local.set({ ['lastWatched']: toStoreLW }, function () {
+        console.log('last watched ' + title + " " + episode + " " + time + "/" + totalTime)
+        // connect to port info
+        let port = chrome.runtime.connect({ name: "info" });
 
-      // pass data for popup.js to display
-      port.postMessage({ title: title, episode: episode, time: time, totalTime: totalTime, site: site, malUpdateStatus: malUpdateStatus, action: 'tracking' });
-      port.onMessage.addListener(function (msg) { });
-    });
+        // pass data for popup.js to display
+        port.postMessage({ title: title, episode: episode, time: time, totalTime: totalTime, site: site, malUpdateStatus: malUpdateStatus, action: 'tracking' });
+        port.onMessage.addListener(function (msg) { });
+      });
+  }
   });
+
   // check if user is logged in
   chrome.storage.local.get(['userAuthCode'], function (result) {
     if(result['userAuthCode']!=undefined){
