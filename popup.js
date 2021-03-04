@@ -14,7 +14,7 @@ var malIDs = {}
 // popup alerts
 chrome.storage.local.get(['seenUpdate'],function(result){
   if(!result['seenUpdate']){
-    confirm("Improved MAL sync and Artwork accuracy")
+    confirm("If Mal sync is not working please logout and login again")
     chrome.storage.local.set({'seenUpdate':true})
   }
 
@@ -174,6 +174,7 @@ function convertJST(timeStr) {
  *  
  */
 function updateDOM() {
+  document.querySelector('.slash').style.display = allData[lastWatched[index]].site =='9anime'? "none":"inline"
   if (lastWatched.length > 0) {
     if(isTracking){
       isTracking=false;
