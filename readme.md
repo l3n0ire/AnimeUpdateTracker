@@ -1,6 +1,6 @@
 # Anime Update Tracker
 
-Anime Update Tracker is a all-in-one for keeping track of your progress on the anime you're watching. Currently supports tracking on Anime Update and 4anime with support for other sites to come.
+Anime Update Tracker is a all-in-one for keeping track of your progress on the anime you're watching. Currently supports tracking on Anime Update, 4anime, and  9anime with support for other sites to come.
 
 ## Installation
 
@@ -18,7 +18,7 @@ For developers
 #### Basic Usage
 
 1. Pin this extension so you can click on it.
-2. Navigate to an episode on either https://anime-update.com/ or https://4anime.to/.
+2. Navigate to an episode on either https://anime-update.com/ , https://4anime.to/ or https://www13.9anime.to/
 3. Click "Start Tracking" to track that episode
 4. Wait 5 sec and "Currently Watching" should appear. That means tracking was successful.
 
@@ -49,6 +49,7 @@ For developers
 ## Issues
 - Only the "video" video player on Anime Update is supported. Support for other video players is not possible at this time
 - Resume may not work for some episodes on Anime Update. Please report these by opening an issue and providing a link to the episode
+- Limited support for 9anime (episodes only no progress or next episode)
 
 
 ## Contributing

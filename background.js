@@ -1,6 +1,7 @@
 let animeUpdate = /^https:\/\/anime-update.*/
 let fourAnime = /^https:\/\/4anime\.to.*\//
-var sites = { 'animeUpdate': animeUpdate, 'fourAnime': fourAnime }
+let nineAnime = /(^https:\/\/).*9anime.to\/watch/
+var sites = { 'animeUpdate': animeUpdate, 'fourAnime': fourAnime, 'nineAnime':nineAnime}
 var nextEpisode = false
 var CLIENT_ID
 var userAccessToken
@@ -83,9 +84,11 @@ async function handleInjection(url){
     for(let i=0;i<lastWatched.length;i++){
         //console.log(addData);
         let trackedUrl = addData[lastWatched[i]].url;
-        if(url == trackedUrl || url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('episode')+7)) >=0){
-            setTimeout(injector,1000,'./foreground.js');
-            break;
+        if(url == trackedUrl || 
+            (trackedUrl.indexOf('episode')>=0 && url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('episode')+7)) >=0) ||
+            (trackedUrl.indexOf('ep')>=0 && url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('ep')+2)) >=0) ){
+                setTimeout(injector,1000,'./foreground.js');
+                break;
         }
     }
 
@@ -162,7 +165,6 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
         // inject foreground.js into the current tab when user clicks "Start Tracking"
         chrome.tabs.getSelected(null, (tab) => {
             if (checkURL(tab.url)) {
-                //console.log("ran")
                 injector('./foreground.js')
             }
         });
@@ -191,10 +193,10 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
             // open episode in new tab
             chrome.tabs.create({ "url": url }, function (tab) {
                 // set video to where user last left off
-                setTimeout(function () { chrome.tabs.executeScript(null, { code: `document.querySelector('${videoElement}').currentTime=${time}` }) }, delay)
+                if(videoElement)
+                    setTimeout(function () { chrome.tabs.executeScript(null, { code: `document.querySelector('${videoElement}').currentTime=${time}` }) }, delay)
                 // start tracking the current episode
                 if (url.indexOf('anime-update') >= 0) {
-                    console.log('got here')
                     setTimeout(function () { injector('./foreground.js') }, delay)
                 }
             })
@@ -242,10 +244,10 @@ async function promptMALLogOut(){
     codeVerifier = undefined
     userAccessToken = undefined
     userAuthCode = undefined
-    chrome.storage.local.set({'userAuthCode':null}, function(){
+    chrome.storage.local.set({'userAuthCode':null,'userAccessToken':null}, function(){
         //console.log("logged out")
-        chrome.storage.local.get(['userAuthCode'], function (result) {
-            //console.log(result['userAuthCode'])
+        chrome.storage.local.get(['userAuthCode','userAccessToken'], function (result) {
+            console.log(result['userAuthCode'], result['userAccessToken'])
         })
     })
 }

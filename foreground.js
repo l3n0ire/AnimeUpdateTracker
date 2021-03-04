@@ -59,6 +59,16 @@ else if (url.indexOf('4anime') >= 0) {
   var toTrackButtons = [...nextButtons, ...previousButtons, ...episodeButtons]
 }
 
+else if(url.indexOf('9anime')>=0){
+  site = "9anime"
+  var title = document.querySelector('h2[itemprop=name]').innerHTML
+  var episode = document.querySelector('[data-type=episode]').innerHTML
+
+  let nextButtons = document.querySelector('.ctl.next.tip')
+  let previousButtons = document.querySelector('.ctl.prev.tip')
+  var toTrackButtons = [nextButtons,previousButtons]
+}
+
 // common vars
 var time = "00:00"
 var totalTime = "00:00"
@@ -143,6 +153,11 @@ function getNextEpisodeLink(){
     if(document.querySelector('.anipager-next a') != undefined)
       nextEpisodeLink = document.querySelector('.anipager-next a').href
   }
+  else if(site=='9anime'){
+    time=""
+    totalTime=""
+  }
+  // no  next episode for 9anime
   return nextEpisodeLink
 }
 
@@ -180,7 +195,9 @@ setInterval(async function () {
   }
   // calculate progress
   // -1 means duration is 0
-  let progress = videoElement.duration != 0 ? videoElement.currentTime / videoElement.duration : -1
+  let progress =-1;
+  if(videoElement!=="")
+    progress = videoElement.duration != 0 ? videoElement.currentTime / videoElement.duration : -1
 
   let toStore
   var toStoreLW = []
@@ -238,6 +255,10 @@ setInterval(async function () {
             malUpdateStatus = response.action
           });
       }
+      // if(site == '9anime'){
+      //   clearInterval(interval)
+        
+      // }
     }
   });
 
