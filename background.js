@@ -86,7 +86,7 @@ async function handleInjection(url){
         let trackedUrl = addData[lastWatched[i]].url;
         if(url == trackedUrl || 
             (trackedUrl.indexOf('episode')>=0 && url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('episode')+7)) >=0) ||
-            (trackedUrl.indexOf('ep')>=0 && url.indexOf(trackedUrl.substring(0,trackedUrl.indexOf('ep')+2)) >=0) ){
+            (trackedUrl.indexOf('ep')>=0 && trackedUrl.indexOf('9anime') >=0 && url.indexOf(trackedUrl.substring(trackedUrl.indexOf('9anime')+6,trackedUrl.indexOf('ep')+2)) >=0) ){
                 setTimeout(injector,1000,'./foreground.js');
                 break;
         }
